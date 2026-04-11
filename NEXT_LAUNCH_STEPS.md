@@ -2,13 +2,15 @@
 
 ## 1. GitHub
 
-Git is not currently available in this local terminal, so the project cannot be pushed from here yet.
+Git is installed and the first local commit has been created:
+
+- `815a479 Initial Zezpon launch-ready site`
 
 Before pushing:
 
-- install Git or use GitHub Desktop
 - create a private GitHub repository
-- add the project from `C:\Projects\ZEZPOn`
+- add the GitHub remote to the project at `C:\Projects\ZEZPOn`
+- push the committed project to GitHub
 - confirm ignored runtime/test files are not included
 
 Commit these important files:
