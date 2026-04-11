@@ -48,10 +48,6 @@ const PUBLIC_FILES = new Set([
   "Zezpon.html",
   "contact.html",
   "guides.html",
-  "guide-budget.html",
-  "guide-cpi.html",
-  "guide-rates.html",
-  "guide-watchlist.html",
   "membership.html",
   "module-asx.html",
   "module-budget.html",
@@ -77,7 +73,11 @@ const MEMBER_FILES = new Set([
   "dashboard.html",
   "profile.html",
   "results.html",
-  "guide-asx.html"
+  "guide-asx.html",
+  "guide-budget.html",
+  "guide-cpi.html",
+  "guide-rates.html",
+  "guide-watchlist.html"
 ]);
 
 const ADMIN_FILES = new Set([
@@ -92,12 +92,7 @@ const PREMIUM_FILES = new Set([
   "video-budget.html"
 ]);
 
-const MEMBERSHIP_REDIRECT_FILES = new Set([
-  "guide-budget.html",
-  "guide-cpi.html",
-  "guide-rates.html",
-  "guide-watchlist.html"
-]);
+const MEMBERSHIP_REDIRECT_FILES = new Set([]);
 
 const OLD_REDIRECTS = new Map([
   ["/previews.html", "/videos.html"],
@@ -1057,13 +1052,13 @@ function buildDashboardPayload(user) {
         { title: "Home", description: "Return to the main site and member entry points.", href: "/Zezpon.html" },
         { title: "News", description: "Read market stories and public updates.", href: "/news.html" },
         { title: "Results", description: "Open your member results page.", href: "/results.html" },
-        { title: "ASX Basics", description: "Access the current guide available to members.", href: "/guide-asx.html" },
+        { title: "Guides", description: "Open the member guide library.", href: "/guides.html" },
         { title: "Contact", description: "Reach support, partnerships, or account help.", href: "/contact.html" },
         ...commonCards
       ],
       notes: [
         safeUser.emailVerified ? "Your email address has been verified." : "Verify your email address to keep your account fully secured.",
-        "Members can access the home page, news, results, contact, and the ASX Basics guide.",
+        "Members can access the home page, news, results, contact, and the guide library.",
         "Your account is stored securely on the server."
       ],
       featuredVideos
@@ -1076,13 +1071,13 @@ function buildDashboardPayload(user) {
       { title: "Home", description: "Return to the main site and member entry points.", href: "/Zezpon.html" },
       { title: "News", description: "Read market stories and public updates.", href: "/news.html" },
       { title: "Results", description: "Open your member results page.", href: "/results.html" },
-      { title: "ASX Basics", description: "Access the current guide available to members.", href: "/guide-asx.html" },
+      { title: "Guides", description: "Open the member guide library.", href: "/guides.html" },
       { title: "Contact", description: "Reach support, partnerships, or account help.", href: "/contact.html" },
       ...commonCards
     ],
     notes: [
       safeUser.emailVerified ? "Your email address has been verified." : "Verify your email address to keep your account fully secured.",
-      "Members can access the home page, news, results, contact, and the ASX Basics guide.",
+      "Members can access the home page, news, results, contact, and the guide library.",
       "Upgrade to Premium when you want the full video library."
     ],
     featuredVideos
