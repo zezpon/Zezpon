@@ -586,6 +586,12 @@ h3 {
   min-height: 170px;
 }
 
+.guides-grid .compact-card {
+  display: grid;
+  place-items: center;
+  text-align: center;
+}
+
 .content-cluster {
   display: grid;
   gap: 18px;
