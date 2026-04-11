@@ -1,0 +1,66 @@
+services:
+  - type: web
+    name: zezpon
+    runtime: docker
+    plan: starter
+    autoDeploy: true
+    healthCheckPath: /api/health
+    disk:
+      name: zezpon-data
+      mountPath: /app/runtime-data
+      sizeGB: 5
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3000
+      - key: ZEZPON_DATA_DIR
+        value: /app/runtime-data
+      - key: SHOW_DEBUG_TOKENS
+        value: false
+      - key: BILLING_PROVIDER
+        sync: false
+      - key: BASIC_PLAN_CHECKOUT_URL
+        sync: false
+      - key: PREMIUM_PLAN_CHECKOUT_URL
+        sync: false
+      - key: PUBLIC_BASE_URL
+        sync: false
+      - key: ZEZPON_ADMIN_NAME
+        sync: false
+      - key: ZEZPON_ADMIN_USERNAME
+        sync: false
+      - key: ZEZPON_ADMIN_EMAIL
+        sync: false
+      - key: ZEZPON_ADMIN_PASSWORD
+        sync: false
+      - key: MAIL_FROM
+        sync: false
+      - key: SMTP_HOST
+        sync: false
+      - key: SMTP_PORT
+        sync: false
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASS
+        sync: false
+      - key: SMTP_SECURE
+        sync: false
+      - key: SMTP_REQUIRE_TLS
+        sync: false
+      - key: STORAGE_PROVIDER
+        sync: false
+      - key: STORAGE_BUCKET
+        sync: false
+      - key: STORAGE_REGION
+        sync: false
+      - key: STORAGE_ENDPOINT
+        sync: false
+      - key: STORAGE_PUBLIC_BASE_URL
+        sync: false
+      - key: STORAGE_ACCESS_KEY_ID
+        sync: false
+      - key: STORAGE_SECRET_ACCESS_KEY
+        sync: false
+      - key: STORAGE_FORCE_PATH_STYLE
+        sync: false

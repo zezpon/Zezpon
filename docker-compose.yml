@@ -1,0 +1,13 @@
+services:
+  zezpon:
+    build: .
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+    env_file:
+      - .env.production
+    volumes:
+      - zezpon-data:/app/runtime-data
+
+volumes:
+  zezpon-data:

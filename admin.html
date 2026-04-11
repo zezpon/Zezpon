@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests" />
+  <meta name="description" content="Manage Zezpon members, plans, and admin access." />
+  <title>Admin Tools | Zezpon</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="site-header"><div class="container nav-wrap"><a href="Zezpon.html" class="brand"><div class="brand-mark">Z</div><div class="brand-copy"><strong>Zezpon</strong><span>Australian Market Academy</span></div></a><button class="menu-toggle" type="button" aria-expanded="false" aria-controls="siteNav">Menu</button><nav id="siteNav" class="site-nav"><a href="Zezpon.html">Home</a><a href="modules.html">Modules</a><a href="news.html">News</a><a href="results.html">Results</a><a href="videos.html">Videos</a><a href="membership.html">Membership</a><a href="guides.html">Guides</a><a href="contact.html">Contact</a></nav><div class="nav-actions"><a class="btn btn-secondary" href="dashboard.html">Dashboard</a></div></div></header>
+  <main>
+    <section class="page-hero">
+      <div class="container">
+        <p class="eyebrow">Admin Area</p>
+        <h1>Admin Tools</h1>
+        <p>Review members, track plan counts, and promote or downgrade access without opening the database manually.</p>
+      </div>
+    </section>
+    <section class="section">
+      <div class="container">
+        <div id="adminStats" class="card-grid cols-3"></div>
+      </div>
+    </section>
+    <section class="section">
+      <div class="container">
+        <div id="adminInsights" class="card-grid cols-3"></div>
+      </div>
+    </section>
+    <section class="section">
+      <div class="container">
+        <div id="adminMessage" class="auth-message"></div>
+        <div class="admin-list" id="adminUserList"></div>
+      </div>
+    </section>
+    <section class="section">
+      <div class="container detail-layout">
+        <div class="detail-copy">
+          <section>
+            <p class="panel-label">Content Manager</p>
+            <form id="contentForm">
+              <input type="hidden" name="contentId" />
+              <div class="admin-control-row">
+                <div class="field-block">
+                  <label for="contentType">Type</label>
+                  <select id="contentType" name="type">
+                    <option value="video">Video</option>
+                    <option value="news">News</option>
+                  </select>
+                </div>
+                <div class="field-block">
+                  <label for="contentStatus">Status</label>
+                  <select id="contentStatus" name="status">
+                    <option value="draft">Draft</option>
+                    <option value="published">Published</option>
+                  </select>
+                </div>
+              </div>
+              <div class="field-block">
+                <label for="contentTitle">Title</label>
+                <input id="contentTitle" name="title" type="text" required />
+              </div>
+              <div class="field-block">
+                <label for="contentSlug">Slug</label>
+                <input id="contentSlug" name="slug" type="text" required />
+              </div>
+              <div class="field-block">
+                <label for="contentSummary">Summary</label>
+                <input id="contentSummary" name="summary" type="text" required />
+              </div>
+              <div class="field-block">
+                <label for="contentBody">Body</label>
+                <textarea id="contentBody" name="body" rows="6"></textarea>
+              </div>
+              <div class="admin-control-row">
+                <div class="field-block">
+                  <label for="contentMediaUrl">Link Or Media URL</label>
+                  <input id="contentMediaUrl" name="mediaUrl" type="text" />
+                </div>
+                <div class="field-block">
+                  <label for="contentPosterUrl">Poster Image URL</label>
+                  <input id="contentPosterUrl" name="posterUrl" type="text" />
+                </div>
+              </div>
+              <div class="admin-control-row">
+                <div class="field-block">
+                  <label for="contentAccessLevel">Access Level</label>
+                  <select id="contentAccessLevel" name="accessLevel">
+                    <option value="public">Public</option>
+                    <option value="basic">Basic</option>
+                    <option value="premium">Premium</option>
+                  </select>
+                </div>
+                <div class="field-block">
+                  <label for="contentCategorySlug">Category</label>
+                  <select id="contentCategorySlug" name="categorySlug">
+                    <option value="">General</option>
+                    <option value="markets">Markets</option>
+                    <option value="economy">Economy</option>
+                    <option value="budgeting">Budgeting</option>
+                    <option value="beginner">Beginner</option>
+                    <option value="strategy">Strategy</option>
+                  </select>
+                </div>
+              </div>
+              <div class="admin-control-row">
+                <div class="field-block">
+                  <label for="contentModuleSlug">Module</label>
+                  <select id="contentModuleSlug" name="moduleSlug">
+                    <option value="">Video Library Only</option>
+                    <option value="asx-workouts">ASX Workouts</option>
+                    <option value="cpi-calendar">CPI Calendar</option>
+                    <option value="video-blogs">Video Blogs</option>
+                    <option value="budget-systems">Budget Systems</option>
+                  </select>
+                </div>
+                <div class="field-block">
+                  <label for="contentGuideSlug">Guide Link</label>
+                  <select id="contentGuideSlug" name="guideSlug">
+                    <option value="">No guide link</option>
+                    <option value="asx-basics">ASX Basics</option>
+                  </select>
+                </div>
+              </div>
+              <div class="admin-control-row">
+                <div class="field-block">
+                  <label for="contentDurationText">Duration</label>
+                  <input id="contentDurationText" name="durationText" type="text" placeholder="8 min" />
+                </div>
+                <div class="field-block">
+                  <label for="contentDisplayOrder">Display Order</label>
+                  <input id="contentDisplayOrder" name="displayOrder" type="number" min="0" step="1" value="100" />
+                </div>
+              </div>
+              <div class="field-block">
+                <label class="checkbox-field" for="contentIsFeatured">
+                  <input id="contentIsFeatured" name="isFeatured" type="checkbox" value="true" />
+                  <span>Show in featured areas</span>
+                </label>
+              </div>
+              <div class="field-block">
+                <label for="contentUpload">Upload Video File</label>
+                <input id="contentUpload" name="file" type="file" accept=".mp4,.webm,.mov,video/mp4,video/webm,video/quicktime" />
+              </div>
+              <div class="form-actions">
+                <button class="btn btn-secondary" type="button" id="uploadContentFile">Upload File</button>
+                <button class="btn btn-primary" type="submit">Save Content</button>
+                <button class="btn btn-secondary" type="button" id="contentReset">Clear</button>
+              </div>
+            </form>
+          </section>
+        </div>
+        <aside class="detail-sidebar">
+          <p class="panel-label">Recent Activity</p>
+          <ul class="info-list" id="adminAuditLog"></ul>
+        </aside>
+      </div>
+    </section>
+    <section class="section">
+      <div class="container">
+        <div class="admin-list" id="adminContentList"></div>
+      </div>
+    </section>
+  </main>
+  <script src="site.js"></script>
+  <script src="auth.js"></script>
+  <script src="admin.js"></script>
+</body>
+</html>

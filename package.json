@@ -1,0 +1,22 @@
+{
+  "name": "zezpon",
+  "version": "1.0.0",
+  "description": "Zezpon website with server-backed auth",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "test": "echo \"No tests configured\""
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.1027.0",
+    "better-sqlite3": "^12.8.0",
+    "express": "^5.2.1",
+    "multer": "^2.1.1",
+    "nodemailer": "^8.0.4"
+  }
+}

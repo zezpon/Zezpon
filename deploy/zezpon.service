@@ -1,0 +1,16 @@
+[Unit]
+Description=Zezpon Web Application
+After=network.target
+
+[Service]
+Type=simple
+User=zezpon
+Group=zezpon
+WorkingDirectory=/srv/zezpon/current
+EnvironmentFile=/etc/zezpon/zezpon.env
+ExecStart=/usr/bin/node /srv/zezpon/current/server.js
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; media-src 'self'; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests" />
+  <meta name="description" content="Watch a Zezpon member video lesson." />
+  <title>Video Lesson | Zezpon</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="site-header"><div class="container nav-wrap"><a href="Zezpon.html" class="brand"><div class="brand-mark">Z</div><div class="brand-copy"><strong>Zezpon</strong><span>Australian Market Academy</span></div></a><button class="menu-toggle" type="button" aria-expanded="false" aria-controls="siteNav">Menu</button><nav id="siteNav" class="site-nav"><a href="Zezpon.html">Home</a><a href="modules.html">Modules</a><a href="news.html">News</a><a href="results.html">Results</a><a class="active" href="videos.html">Videos</a><a href="membership.html">Membership</a><a href="guides.html">Guides</a><a href="contact.html">Contact</a></nav><div class="nav-actions" hidden></div></div></header>
+  <main>
+    <section class="page-hero">
+      <div class="container">
+        <p class="eyebrow">Video Lesson</p>
+        <h1 id="videoTitle">Loading video...</h1>
+        <p id="videoSubtitle">Preparing the lesson details.</p>
+      </div>
+    </section>
+    <section class="section">
+      <div class="container detail-layout">
+        <div class="detail-copy video-player-shell">
+          <article class="card video-player-card">
+            <video id="videoPlayer" class="video-player-frame" controls playsinline hidden></video>
+            <div id="videoFallback" class="card-body">
+              <p class="auth-message">Loading video lesson...</p>
+            </div>
+          </article>
+          <section>
+            <div id="videoMeta" class="video-meta-strip"></div>
+            <div id="videoBody"></div>
+          </section>
+          <section>
+            <div class="section-head">
+              <div>
+                <p class="eyebrow">Related</p>
+                <h2>Keep watching</h2>
+              </div>
+            </div>
+            <div id="relatedVideos" class="card-grid cols-3"></div>
+          </section>
+        </div>
+        <aside class="detail-sidebar">
+          <p class="panel-label">Actions</p>
+          <div class="sidebar-actions">
+            <a class="btn btn-secondary" href="videos.html">Back to videos</a>
+            <a class="btn btn-primary" id="videoOpenDirect" href="videos.html">Open source</a>
+          </div>
+          <div id="videoSidebarNotes" class="auth-message"></div>
+        </aside>
+      </div>
+    </section>
+  </main>
+  <script src="site.js"></script>
+  <script src="video-detail.js"></script>
+</body>
+</html>
