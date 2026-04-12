@@ -555,6 +555,46 @@ h3 {
   height: 100%;
 }
 
+.video-placeholder-wrap {
+  display: grid;
+  gap: 18px;
+}
+
+.video-placeholder-card {
+  border-style: dashed;
+}
+
+.video-placeholder-thumb {
+  min-height: 150px;
+  border-radius: 20px;
+  border: 1px solid rgba(222, 199, 122, 0.28);
+  background:
+    radial-gradient(circle at 50% 45%, rgba(222, 199, 122, 0.22), transparent 30%),
+    linear-gradient(135deg, rgba(222, 199, 122, 0.12), rgba(255, 255, 255, 0.03) 46%, rgba(0, 0, 0, 0.18));
+  display: grid;
+  place-items: center;
+  margin-bottom: 18px;
+}
+
+.video-placeholder-play {
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  border: 1px solid rgba(222, 199, 122, 0.5);
+  background: rgba(222, 199, 122, 0.12);
+  position: relative;
+}
+
+.video-placeholder-play::after {
+  content: "";
+  position: absolute;
+  left: 23px;
+  top: 18px;
+  border-left: 17px solid var(--gold-soft);
+  border-top: 11px solid transparent;
+  border-bottom: 11px solid transparent;
+}
+
 .content-card-meta {
   display: flex;
   align-items: center;

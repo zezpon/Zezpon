@@ -54,6 +54,10 @@ async function loadSingleFeed(feed) {
   const result = await response.json();
   const items = Array.isArray(result.items) ? result.items : [];
   if (!items.length) {
+    if (type === "video" && feed.dataset.module) {
+      feed.innerHTML = renderModuleVideoPlaceholders(feed.dataset.emptyMessage);
+      return;
+    }
     feed.innerHTML = `<p class="auth-message">${escapeHtml(feed.dataset.emptyMessage || `No ${type} items are available yet.`)}</p>`;
     return;
   }
@@ -64,6 +68,31 @@ async function loadSingleFeed(feed) {
   }
 
   feed.innerHTML = `<div class="card-grid cols-3">${items.map((item) => renderContentCard(item)).join("")}</div>`;
+}
+
+function renderModuleVideoPlaceholders(message) {
+  const labels = ["Lesson video", "Walkthrough", "Member example"];
+  return `
+    <div class="video-placeholder-wrap">
+      <p class="auth-message">${escapeHtml(message || "Module videos will appear here.")}</p>
+      <div class="card-grid cols-3">
+        ${labels.map((label) => renderVideoPlaceholderCard(label)).join("")}
+      </div>
+    </div>
+  `;
+}
+
+function renderVideoPlaceholderCard(label) {
+  return `
+    <article class="card compact-card content-card video-placeholder-card" aria-label="${escapeAttribute(label)} upload placeholder">
+      <div class="video-placeholder-thumb">
+        <span class="video-placeholder-play" aria-hidden="true"></span>
+      </div>
+      <p class="panel-label">${escapeHtml(label)}</p>
+      <h3>Video upload space</h3>
+      <p>Upload a recording from the admin tools and it will appear in this module automatically.</p>
+    </article>
+  `;
 }
 
 function renderModuleGroup(group) {
