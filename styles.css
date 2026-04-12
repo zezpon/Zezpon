@@ -687,6 +687,7 @@ h3 {
 
 .module-layout {
   gap: 22px;
+  grid-template-columns: minmax(0, 1fr);
 }
 
 .detail-copy {
