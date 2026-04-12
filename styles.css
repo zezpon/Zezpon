@@ -495,6 +495,41 @@ h3 {
   pointer-events: none;
 }
 
+.module-lock-card {
+  isolation: isolate;
+}
+
+.module-lock-card > * {
+  position: relative;
+  z-index: 1;
+}
+
+.module-lock-card::before {
+  top: 50%;
+  left: 50%;
+  right: auto;
+  width: 58px;
+  height: 42px;
+  border-radius: 14px;
+  border-color: rgba(235, 213, 155, 0.3);
+  background: rgba(235, 213, 155, 0.05);
+  opacity: 0.72;
+  transform: translate(-50%, -18%);
+  z-index: 0;
+}
+
+.module-lock-card::after {
+  top: 50%;
+  left: 50%;
+  right: auto;
+  width: 32px;
+  height: 28px;
+  border-color: rgba(235, 213, 155, 0.3);
+  opacity: 0.72;
+  transform: translate(-50%, -95%);
+  z-index: 0;
+}
+
 .card-body {
   padding: 24px;
 }
