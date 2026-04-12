@@ -4,6 +4,7 @@ async function initBillingUi() {
   const billingNote = document.getElementById("billingSetupNote");
   const signupPlan = document.getElementById("signupPlan");
   const signupBillingNote = document.getElementById("signupBillingNote");
+  const selectedSignupPlan = getSelectedSignupPlan();
 
   let config = null;
   let sessionUser = null;
@@ -60,22 +61,53 @@ async function initBillingUi() {
   }
 
   if (signupPlan instanceof HTMLSelectElement) {
-    const params = new URLSearchParams(window.location.search);
-    const plan = String(params.get("plan") || "").trim().toLowerCase();
-    if (plan === "basic" || plan === "premium") {
-      signupPlan.value = plan;
+    if (selectedSignupPlan === "basic" || selectedSignupPlan === "premium") {
+      signupPlan.value = selectedSignupPlan;
     }
   } else if (signupPlan instanceof HTMLInputElement) {
-    const params = new URLSearchParams(window.location.search);
-    const plan = String(params.get("plan") || "").trim().toLowerCase();
-    signupPlan.value = plan === "premium" ? "premium" : "basic";
+    signupPlan.value = selectedSignupPlan;
   }
+
+  updateSignupPlanPricing(selectedSignupPlan);
 
   if (signupBillingNote) {
     signupBillingNote.textContent = config.basicCheckoutConfigured || config.premiumCheckoutConfigured
       ? `After account creation, secure checkout will open for the selected plan through ${config.provider}.`
       : "After account creation, the selected plan continues through the membership flow.";
   }
+}
+
+function getSelectedSignupPlan() {
+  const params = new URLSearchParams(window.location.search);
+  return String(params.get("plan") || "").trim().toLowerCase() === "premium" ? "premium" : "basic";
+}
+
+function updateSignupPlanPricing(plan) {
+  const title = document.getElementById("signupPlanTitle");
+  const description = document.getElementById("signupPlanDescription");
+  const pricing = document.getElementById("signupPlanPricing");
+  if (!title || !description || !pricing) {
+    return;
+  }
+
+  const selectedPlan = plan === "premium" ? "premium" : "basic";
+  const planDetails = selectedPlan === "premium"
+    ? {
+        title: "Premium",
+        description: "Premium adds videos, featured member content, and deeper lesson pathways.",
+        options: [["Monthly", "$24/month"], ["3 months", "$68"], ["6 months", "$132"], ["Yearly", "$240"]]
+      }
+    : {
+        title: "Basic",
+        description: "Basic gives access to the core member experience, guides, news, results, and account tools.",
+        options: [["Monthly", "$12/month"], ["3 months", "$34"], ["6 months", "$66"], ["Yearly", "$120"]]
+      };
+
+  title.textContent = planDetails.title;
+  description.textContent = planDetails.description;
+  pricing.innerHTML = planDetails.options
+    .map(([label, price]) => `<div><span>${label}</span><strong>${price}</strong></div>`)
+    .join("");
 }
 
 function updatePriceLabel(elementId, priceLabel) {
