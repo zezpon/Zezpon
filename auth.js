@@ -38,10 +38,6 @@ function initAuthForm(formId, endpoint) {
 
     const next = new URLSearchParams(window.location.search).get("next");
     const safeNext = getSafeRelativeRedirect(next);
-    if (formId === "signupForm" && result.billingUrl && !safeNext) {
-      window.location.href = result.billingUrl;
-      return;
-    }
     const destination = safeNext || result.redirectTo || "dashboard.html";
     window.location.href = destination;
   });
