@@ -791,6 +791,14 @@ h3 {
   max-width: 44ch;
 }
 
+.plan-price {
+  color: var(--gold-soft);
+  font-family: var(--display);
+  font-size: clamp(28px, 4vw, 46px);
+  line-height: 1;
+  margin: 14px 0 18px;
+}
+
 .field-block {
   margin-bottom: 16px;
 }

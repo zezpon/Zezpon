@@ -261,6 +261,7 @@ app.post("/api/auth/signup", createRateLimit({
   const name = String(req.body.name || "").trim();
   const email = String(req.body.email || "").trim().toLowerCase();
   const password = String(req.body.password || "");
+  const requestedPlan = String(req.body.plan || "").toLowerCase() === "premium" ? "premium" : "basic";
   const plan = "basic";
 
   if (!username || !name || !email || !password) {
@@ -318,14 +319,14 @@ app.post("/api/auth/signup", createRateLimit({
     actorUserId: user.id,
     targetUserId: user.id,
     action: "auth.signup",
-    metadata: { plan: user.plan }
+    metadata: { plan: user.plan, requestedPlan }
   });
 
   return res.status(201).json({
     user: sanitizeUser(user),
     redirectTo: "/dashboard.html",
-    billingRequired: Boolean(getCheckoutLinkForPlan("basic")),
-    billingUrl: getCheckoutLinkForPlan("basic") || "",
+    billingRequired: Boolean(getCheckoutLinkForPlan(requestedPlan)),
+    billingUrl: getCheckoutLinkForPlan(requestedPlan) || "",
     verificationToken: process.env.SHOW_DEBUG_TOKENS === "true" ? verification.token : undefined
   });
 });
@@ -373,6 +374,8 @@ app.get("/api/session", (req, res) => {
 app.get("/api/billing/config", (_req, res) => {
   return res.json({
     provider: getBillingProvider(),
+    basicPriceLabel: getPlanPriceLabel("basic"),
+    premiumPriceLabel: getPlanPriceLabel("premium"),
     mode: getBillingMode(),
     basicCheckoutConfigured: Boolean(getCheckoutLinkForPlan("basic")),
     premiumCheckoutConfigured: Boolean(getCheckoutLinkForPlan("premium"))
@@ -2116,6 +2119,13 @@ function getCheckoutLinkForPlan(plan) {
     return String(process.env.PREMIUM_PLAN_CHECKOUT_URL || "").trim();
   }
   return String(process.env.BASIC_PLAN_CHECKOUT_URL || "").trim();
+}
+
+function getPlanPriceLabel(plan) {
+  if (String(plan || "").trim().toLowerCase() === "premium") {
+    return String(process.env.PREMIUM_PLAN_PRICE_LABEL || "").trim();
+  }
+  return String(process.env.BASIC_PLAN_PRICE_LABEL || "").trim();
 }
 
 function createStorageProvider() {

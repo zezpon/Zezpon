@@ -28,36 +28,35 @@ async function initBillingUi() {
     return;
   }
 
+  updatePriceLabel("basicPlanPrice", config.basicPriceLabel);
+  updatePriceLabel("premiumPlanPrice", config.premiumPriceLabel);
+
   if (basicButton instanceof HTMLAnchorElement) {
-    basicButton.href = "/signup.html";
+    basicButton.href = "/signup.html?plan=basic";
     basicButton.textContent = "Join Basic";
   }
 
   if (premiumButton instanceof HTMLAnchorElement) {
-    if (!config.premiumCheckoutConfigured) {
-      premiumButton.href = "/contact.html";
-      premiumButton.textContent = "Ask About Premium";
-      premiumButton.classList.remove("btn-primary");
-      premiumButton.classList.add("btn-secondary");
-    } else if (!sessionUser) {
-      premiumButton.href = "/signup.html";
-      premiumButton.textContent = "Start With Basic";
+    if (!sessionUser) {
+      premiumButton.href = "/signup.html?plan=premium";
+      premiumButton.textContent = "Join Premium";
     } else if (String(sessionUser.plan || "").toLowerCase() === "premium") {
       premiumButton.href = "/dashboard.html";
       premiumButton.textContent = "Premium Active";
-    } else {
+    } else if (config.premiumCheckoutConfigured) {
       premiumButton.href = "#";
       premiumButton.textContent = "Upgrade To Premium";
       premiumButton.addEventListener("click", handlePremiumUpgradeClick);
+    } else {
+      premiumButton.href = "/contact.html";
+      premiumButton.textContent = "Premium Setup Pending";
     }
   }
 
   if (billingNote) {
-    if (config.mode === "hosted-checkout") {
-      billingNote.textContent = `Hosted checkout is connected through ${config.provider}.`;
-    } else {
-      billingNote.textContent = "Accounts are live, but hosted billing still needs to be connected before launch.";
-    }
+    billingNote.textContent = config.basicCheckoutConfigured || config.premiumCheckoutConfigured
+      ? `Hosted checkout is connected through ${config.provider}.`
+      : "Membership continues through the account flow before checkout.";
   }
 
   if (signupPlan instanceof HTMLSelectElement) {
@@ -66,13 +65,26 @@ async function initBillingUi() {
     if (plan === "basic" || plan === "premium") {
       signupPlan.value = plan;
     }
+  } else if (signupPlan instanceof HTMLInputElement) {
+    const params = new URLSearchParams(window.location.search);
+    const plan = String(params.get("plan") || "").trim().toLowerCase();
+    signupPlan.value = plan === "premium" ? "premium" : "basic";
   }
 
   if (signupBillingNote) {
-    signupBillingNote.textContent = config.basicCheckoutConfigured
-      ? `After account creation, secure checkout will open for Basic through ${config.provider}.`
-      : "All new accounts begin on Basic. Hosted billing can be connected before launch.";
+    signupBillingNote.textContent = config.basicCheckoutConfigured || config.premiumCheckoutConfigured
+      ? `After account creation, secure checkout will open for the selected plan through ${config.provider}.`
+      : "After account creation, the selected plan continues through the membership flow.";
   }
+}
+
+function updatePriceLabel(elementId, priceLabel) {
+  const element = document.getElementById(elementId);
+  if (!element) {
+    return;
+  }
+  const value = String(priceLabel || "").trim();
+  element.textContent = value || "Set price before launch";
 }
 
 async function handlePremiumUpgradeClick(event) {

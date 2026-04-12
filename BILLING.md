@@ -7,15 +7,18 @@ The site now supports hosted checkout handoff through environment variables.
 Set:
 
 - `BILLING_PROVIDER`
+- `BASIC_PLAN_PRICE_LABEL`
+- `PREMIUM_PLAN_PRICE_LABEL`
 - `BASIC_PLAN_CHECKOUT_URL`
 - `PREMIUM_PLAN_CHECKOUT_URL`
 
 ## How it works
 
-1. A visitor creates an account and starts on `Basic`
-2. If `BASIC_PLAN_CHECKOUT_URL` is configured, signup can hand off to hosted checkout for the Basic plan
-3. Logged-in Basic members can use the upgrade flow from the dashboard or membership page
-4. If `PREMIUM_PLAN_CHECKOUT_URL` is configured, the upgrade button sends them to hosted checkout for Premium
+1. A visitor chooses `Basic` or `Premium`
+2. They create their account
+3. If a checkout URL exists for that plan, signup redirects them to hosted checkout
+4. Logged-in Basic members can still use the Premium upgrade flow from the dashboard or membership page
+5. Until provider webhooks are added, Premium access should be confirmed through admin review after payment
 
 ## Recommended providers
 
@@ -26,7 +29,7 @@ Set:
 ## Before launch
 
 - Use real provider checkout URLs
-- Confirm Basic signup opens the correct checkout, if you want paid signup immediately
+- Confirm the correct plan opens from signup and membership
 - Confirm Premium upgrade opens the correct checkout from both the dashboard and membership page
 - Decide how successful payment will update long-term billing records
 - Confirm cancellation, refund, and failed-payment handling for your chosen provider

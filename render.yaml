@@ -20,6 +20,10 @@ services:
         value: false
       - key: BILLING_PROVIDER
         sync: false
+      - key: BASIC_PLAN_PRICE_LABEL
+        sync: false
+      - key: PREMIUM_PLAN_PRICE_LABEL
+        sync: false
       - key: BASIC_PLAN_CHECKOUT_URL
         sync: false
       - key: PREMIUM_PLAN_CHECKOUT_URL
