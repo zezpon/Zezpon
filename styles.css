@@ -501,7 +501,7 @@ h3 {
 
 .module-lock-card > * {
   position: relative;
-  z-index: 1;
+  z-index: 0;
 }
 
 .module-lock-card::before {
@@ -513,9 +513,9 @@ h3 {
   border-radius: 14px;
   border-color: rgba(235, 213, 155, 0.3);
   background: rgba(235, 213, 155, 0.05);
-  opacity: 0.72;
+  opacity: 0.64;
   transform: translate(-50%, -18%);
-  z-index: 0;
+  z-index: 2;
 }
 
 .module-lock-card::after {
@@ -525,9 +525,9 @@ h3 {
   width: 32px;
   height: 28px;
   border-color: rgba(235, 213, 155, 0.3);
-  opacity: 0.72;
+  opacity: 0.64;
   transform: translate(-50%, -95%);
-  z-index: 0;
+  z-index: 2;
 }
 
 .card-body {
