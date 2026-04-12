@@ -799,6 +799,33 @@ h3 {
   margin: 14px 0 18px;
 }
 
+.plan-options {
+  display: grid;
+  gap: 10px;
+  margin: 0 0 22px;
+}
+
+.plan-options div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.plan-options span {
+  color: var(--muted);
+}
+
+.plan-options strong {
+  color: var(--cream);
+  font-family: var(--display);
+  font-size: 22px;
+}
+
 .field-block {
   margin-bottom: 16px;
 }

@@ -84,7 +84,9 @@ function updatePriceLabel(elementId, priceLabel) {
     return;
   }
   const value = String(priceLabel || "").trim();
-  element.textContent = value || "Set price before launch";
+  if (value) {
+    element.textContent = value;
+  }
 }
 
 async function handlePremiumUpgradeClick(event) {

@@ -2123,9 +2123,9 @@ function getCheckoutLinkForPlan(plan) {
 
 function getPlanPriceLabel(plan) {
   if (String(plan || "").trim().toLowerCase() === "premium") {
-    return String(process.env.PREMIUM_PLAN_PRICE_LABEL || "").trim();
+    return String(process.env.PREMIUM_PLAN_PRICE_LABEL || "$24/month").trim();
   }
-  return String(process.env.BASIC_PLAN_PRICE_LABEL || "").trim();
+  return String(process.env.BASIC_PLAN_PRICE_LABEL || "$12/month").trim();
 }
 
 function createStorageProvider() {
