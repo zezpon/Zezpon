@@ -49,14 +49,6 @@ const PUBLIC_FILES = new Set([
   "contact.html",
   "guides.html",
   "membership.html",
-  "module-asx.html",
-  "module-budget.html",
-  "module-cpi.html",
-  "module-intro.html",
-  "module-rates.html",
-  "module-routine.html",
-  "module-watchlist.html",
-  "module-video-blogs.html",
   "modules.html",
   "news-asx.html",
   "news-budget.html",
@@ -81,7 +73,9 @@ const MEMBER_FILES = new Set([
   "guide-budget.html",
   "guide-cpi.html",
   "guide-rates.html",
-  "guide-watchlist.html"
+  "guide-watchlist.html",
+  "module-intro.html",
+  "module-budget.html"
 ]);
 
 const ADMIN_FILES = new Set([
@@ -89,6 +83,12 @@ const ADMIN_FILES = new Set([
 ]);
 
 const PREMIUM_FILES = new Set([
+  "module-asx.html",
+  "module-cpi.html",
+  "module-rates.html",
+  "module-routine.html",
+  "module-watchlist.html",
+  "module-video-blogs.html",
   "videos.html",
   "video-detail.html",
   "video-asx.html",
