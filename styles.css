@@ -543,6 +543,61 @@ h3 {
   border-color: rgba(115, 209, 139, 0.2);
 }
 
+.membership-preview-grid {
+  align-items: stretch;
+}
+
+.membership-preview-card {
+  display: grid;
+  gap: 16px;
+}
+
+.membership-preview-card h3,
+.membership-preview-card p {
+  margin: 0;
+}
+
+.home-plan-price {
+  color: var(--gold-soft);
+  font-family: var(--heading-font);
+  font-size: clamp(38px, 5vw, 62px);
+  line-height: 0.95;
+}
+
+.home-plan-price span {
+  margin-left: 8px;
+  color: var(--muted);
+  font-family: var(--body-font);
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.home-plan-terms {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.home-plan-terms span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 34px;
+  padding: 0 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(235, 213, 155, 0.14);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.membership-preview-card .btn {
+  width: fit-content;
+  margin-top: 4px;
+}
+
 .module-lock-card {
   isolation: isolate;
   min-height: 210px;
