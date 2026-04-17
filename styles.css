@@ -549,7 +549,8 @@ h3 {
 
 .membership-preview-card {
   display: grid;
-  gap: 16px;
+  gap: 18px;
+  align-content: start;
 }
 
 .membership-preview-card h3,
@@ -557,11 +558,24 @@ h3 {
   margin: 0;
 }
 
+.plan-card-top {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 18px;
+}
+
+.plan-card-top h3 {
+  margin-top: 12px;
+}
+
 .home-plan-price {
   color: var(--gold-soft);
   font-family: var(--heading-font);
-  font-size: clamp(38px, 5vw, 62px);
+  font-size: clamp(34px, 4.4vw, 54px);
   line-height: 0.95;
+  text-align: right;
+  white-space: nowrap;
 }
 
 .home-plan-price span {
@@ -572,6 +586,42 @@ h3 {
   font-weight: 800;
   letter-spacing: 0.04em;
   text-transform: uppercase;
+}
+
+.plan-summary {
+  max-width: 48ch;
+  color: var(--text);
+  font-size: 18px;
+  line-height: 1.55;
+}
+
+.plan-feature-list {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+  padding: 18px 0;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  list-style: none;
+}
+
+.plan-feature-list li {
+  position: relative;
+  padding-left: 24px;
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.plan-feature-list li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.68em;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--gold-soft);
+  box-shadow: 0 0 14px rgba(235, 213, 155, 0.28);
 }
 
 .home-plan-terms {
@@ -1413,6 +1463,14 @@ h3 {
   .brand-copy span {
     font-size: 9px;
     letter-spacing: 0.14em;
+  }
+
+  .plan-card-top {
+    grid-template-columns: 1fr;
+  }
+
+  .home-plan-price {
+    text-align: left;
   }
 
   .card-grid.cols-4,
