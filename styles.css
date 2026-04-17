@@ -386,6 +386,34 @@ h3 {
   text-transform: uppercase;
 }
 
+.benefit-grid {
+  display: grid;
+  gap: 10px;
+}
+
+.benefit-grid span {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 54px;
+  padding: 12px 14px;
+  border: 1px solid rgba(235, 213, 155, 0.16);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text);
+  font-weight: 800;
+}
+
+.benefit-grid span::before {
+  content: "";
+  width: 9px;
+  height: 9px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: var(--gold-soft);
+  box-shadow: 0 0 18px rgba(235, 213, 155, 0.34);
+}
+
 .stats-grid {
   grid-template-columns: repeat(3, minmax(0, 1fr));
   margin-top: 26px;
@@ -495,39 +523,76 @@ h3 {
   pointer-events: none;
 }
 
+.access-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  width: fit-content;
+  padding: 0 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(235, 213, 155, 0.2);
+  background: rgba(235, 213, 155, 0.08);
+  color: var(--gold-soft);
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.included-card {
+  border-color: rgba(115, 209, 139, 0.2);
+}
+
 .module-lock-card {
   isolation: isolate;
+  min-height: 210px;
 }
 
 .module-lock-card > * {
   position: relative;
-  z-index: 0;
+  z-index: 1;
+}
+
+.module-lock-card .panel-label::after {
+  content: "Premium";
+  display: inline-flex;
+  align-items: center;
+  min-height: 26px;
+  margin-left: 10px;
+  padding: 0 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(235, 213, 155, 0.2);
+  background: rgba(235, 213, 155, 0.07);
+  color: var(--gold-soft);
+  font-size: 10px;
+  letter-spacing: 0.08em;
 }
 
 .module-lock-card::before {
   top: 50%;
   left: 50%;
   right: auto;
-  width: 58px;
-  height: 42px;
-  border-radius: 14px;
-  border-color: rgba(235, 213, 155, 0.3);
-  background: rgba(235, 213, 155, 0.05);
-  opacity: 0.64;
-  transform: translate(-50%, -18%);
-  z-index: 2;
+  width: 72px;
+  height: 52px;
+  border-radius: 18px;
+  border-color: rgba(235, 213, 155, 0.2);
+  background: rgba(5, 5, 5, 0.42);
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.4);
+  opacity: 0.52;
+  transform: translate(-50%, -8%);
+  z-index: 0;
 }
 
 .module-lock-card::after {
   top: 50%;
   left: 50%;
   right: auto;
-  width: 32px;
-  height: 28px;
-  border-color: rgba(235, 213, 155, 0.3);
-  opacity: 0.64;
-  transform: translate(-50%, -95%);
-  z-index: 2;
+  width: 38px;
+  height: 32px;
+  border-color: rgba(235, 213, 155, 0.2);
+  opacity: 0.52;
+  transform: translate(-50%, -92%);
+  z-index: 0;
 }
 
 .card-body {
@@ -618,6 +683,18 @@ h3 {
   position: relative;
 }
 
+.media-thumb::before {
+  content: "";
+  position: absolute;
+  inset: 22px;
+  border-radius: 18px;
+  border: 1px solid rgba(235, 213, 155, 0.14);
+  background:
+    linear-gradient(90deg, transparent 0 18%, rgba(235, 213, 155, 0.09) 18% 19%, transparent 19% 39%, rgba(235, 213, 155, 0.09) 39% 40%, transparent 40% 60%, rgba(235, 213, 155, 0.09) 60% 61%, transparent 61% 81%, rgba(235, 213, 155, 0.09) 81% 82%, transparent 82%),
+    linear-gradient(180deg, transparent 0 32%, rgba(255, 255, 255, 0.08) 32% 33%, transparent 33% 64%, rgba(255, 255, 255, 0.08) 64% 65%, transparent 65%);
+  opacity: 0.75;
+}
+
 .media-thumb::after {
   content: "ZEZPON";
   position: absolute;
@@ -627,6 +704,54 @@ h3 {
   font-size: 12px;
   font-weight: 900;
   letter-spacing: 0.22em;
+}
+
+.media-thumb-asx {
+  background:
+    radial-gradient(circle at 26% 26%, rgba(115, 209, 139, 0.2), transparent 25%),
+    linear-gradient(135deg, rgba(199, 164, 74, 0.18), rgba(16, 16, 16, 0.9) 45%, #050505 100%);
+}
+
+.media-thumb-asx::before {
+  background:
+    linear-gradient(135deg, transparent 0 42%, rgba(115, 209, 139, 0.65) 42% 44%, transparent 44% 52%, rgba(235, 213, 155, 0.55) 52% 54%, transparent 54%),
+    linear-gradient(90deg, transparent 0 18%, rgba(255, 255, 255, 0.06) 18% 19%, transparent 19% 39%, rgba(255, 255, 255, 0.06) 39% 40%, transparent 40% 60%, rgba(255, 255, 255, 0.06) 60% 61%, transparent 61% 81%, rgba(255, 255, 255, 0.06) 81% 82%, transparent 82%);
+}
+
+.media-thumb-budget {
+  background:
+    radial-gradient(circle at 74% 22%, rgba(235, 213, 155, 0.2), transparent 24%),
+    linear-gradient(135deg, rgba(115, 209, 139, 0.13), rgba(26, 26, 26, 0.94) 48%, #050505 100%);
+}
+
+.media-thumb-budget::before {
+  background:
+    linear-gradient(180deg, rgba(235, 213, 155, 0.5) 0 7%, transparent 7% 23%, rgba(255, 255, 255, 0.1) 23% 24%, transparent 24% 44%, rgba(255, 255, 255, 0.1) 44% 45%, transparent 45% 65%, rgba(255, 255, 255, 0.1) 65% 66%, transparent 66%),
+    linear-gradient(90deg, rgba(235, 213, 155, 0.1), transparent 38%);
+}
+
+.media-thumb-cpi {
+  background:
+    radial-gradient(circle at 28% 72%, rgba(199, 164, 74, 0.28), transparent 26%),
+    linear-gradient(135deg, rgba(240, 140, 140, 0.13), rgba(17, 17, 17, 0.95) 44%, #050505 100%);
+}
+
+.media-thumb-cpi::before {
+  background:
+    linear-gradient(90deg, transparent 8%, rgba(235, 213, 155, 0.52) 8% 16%, transparent 16% 24%, rgba(235, 213, 155, 0.34) 24% 34%, transparent 34% 42%, rgba(235, 213, 155, 0.62) 42% 54%, transparent 54% 62%, rgba(235, 213, 155, 0.42) 62% 72%, transparent 72%),
+    linear-gradient(180deg, transparent 58%, rgba(255, 255, 255, 0.08) 58% 60%, transparent 60%);
+}
+
+.media-thumb-watchlist {
+  background:
+    radial-gradient(circle at 72% 28%, rgba(199, 164, 74, 0.22), transparent 28%),
+    linear-gradient(135deg, rgba(222, 199, 122, 0.14), rgba(15, 15, 15, 0.96) 52%, #050505 100%);
+}
+
+.media-thumb-watchlist::before {
+  background:
+    linear-gradient(90deg, transparent 0 18%, rgba(235, 213, 155, 0.1) 18% 19%, transparent 19%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.1) 0 1px, transparent 1px 21%, rgba(255, 255, 255, 0.1) 21% calc(21% + 1px), transparent calc(21% + 1px) 42%, rgba(255, 255, 255, 0.1) 42% calc(42% + 1px), transparent calc(42% + 1px) 63%, rgba(255, 255, 255, 0.1) 63% calc(63% + 1px), transparent calc(63% + 1px));
 }
 
 .media-thumb-image {
@@ -718,6 +843,39 @@ h3 {
 
 .page-hero-compact p {
   max-width: 54ch;
+}
+
+.page-hero-modules {
+  background:
+    radial-gradient(circle at 78% 18%, rgba(199, 164, 74, 0.16), transparent 28%),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.03), transparent 42%);
+}
+
+.module-hero-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(260px, 0.5fr);
+  align-items: end;
+  gap: 24px;
+}
+
+.module-access-strip {
+  display: grid;
+  gap: 10px;
+}
+
+.module-access-strip span {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 14px 16px;
+  border-radius: 18px;
+  border: 1px solid rgba(235, 213, 155, 0.16);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
 }
 
 .detail-layout {
@@ -1139,6 +1297,7 @@ h3 {
 
   .hero-grid,
   .detail-layout,
+  .module-hero-grid,
   .cta-band-inner,
   .footer-grid,
   .card-grid.cols-2,
@@ -1160,12 +1319,45 @@ h3 {
 
   .hero,
   .page-hero {
-    padding-top: 58px;
+    padding-top: 46px;
   }
 
   .hero-copy h1,
   .page-hero h1 {
     font-size: 38px;
+  }
+
+  .utility-wrap {
+    min-height: auto;
+    padding: 10px 0;
+  }
+
+  .utility-links {
+    gap: 10px;
+  }
+
+  .utility-links a {
+    font-size: 11px;
+  }
+
+  .nav-wrap {
+    min-height: 72px;
+    gap: 12px;
+  }
+
+  .brand-mark {
+    width: 44px;
+    height: 44px;
+    font-size: 19px;
+  }
+
+  .brand-copy strong {
+    font-size: 22px;
+  }
+
+  .brand-copy span {
+    font-size: 9px;
+    letter-spacing: 0.14em;
   }
 
   .card-grid.cols-4,
