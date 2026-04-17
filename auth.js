@@ -38,7 +38,8 @@ function initAuthForm(formId, endpoint) {
 
     const next = new URLSearchParams(window.location.search).get("next");
     const safeNext = getSafeRelativeRedirect(next);
-    const destination = safeNext || result.redirectTo || "dashboard.html";
+    const billingUrl = formId === "signupForm" && result.billingRequired ? getSafeCheckoutRedirect(result.billingUrl) : "";
+    const destination = safeNext || billingUrl || result.redirectTo || "dashboard.html";
     window.location.href = destination;
   });
 }
@@ -144,6 +145,24 @@ function getSafeRelativeRedirect(value) {
   }
 
   return value;
+}
+
+function getSafeCheckoutRedirect(value) {
+  const rawValue = String(value || "").trim();
+  if (!rawValue) {
+    return "";
+  }
+
+  if (rawValue.startsWith("/")) {
+    return getSafeRelativeRedirect(rawValue);
+  }
+
+  try {
+    const parsed = new URL(rawValue);
+    return parsed.protocol === "https:" ? parsed.href : "";
+  } catch {
+    return "";
+  }
 }
 
 function escapeHtml(value) {

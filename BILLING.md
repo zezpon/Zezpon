@@ -14,11 +14,11 @@ Set:
 
 ## How it works
 
-1. A visitor chooses `Basic` or `Premium`
-2. They create their account
-3. If a checkout URL exists for that plan, signup redirects them to hosted checkout
-4. Logged-in Basic members can still use the Premium upgrade flow from the dashboard or membership page
-5. Until provider webhooks are added, Premium access should be confirmed through admin review after payment
+1. A visitor creates a Basic account from signup
+2. If `BASIC_PLAN_CHECKOUT_URL` exists, signup redirects them to hosted Basic checkout
+3. If no Basic checkout URL is configured yet, signup falls back to the dashboard
+4. Logged-in Basic members can use the Premium upgrade flow from the dashboard or membership page
+5. Until provider webhooks are added, paid access should be confirmed through admin review after payment
 
 ## Recommended providers
 
@@ -29,7 +29,7 @@ Set:
 ## Before launch
 
 - Use real provider checkout URLs
-- Confirm the correct plan opens from signup and membership
+- Confirm Basic checkout opens from signup and membership
 - Confirm Premium upgrade opens the correct checkout from both the dashboard and membership page
 - Decide how successful payment will update long-term billing records
 - Confirm cancellation, refund, and failed-payment handling for your chosen provider
