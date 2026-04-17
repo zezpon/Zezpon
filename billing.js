@@ -39,8 +39,8 @@ async function initBillingUi() {
 
   if (premiumButton instanceof HTMLAnchorElement) {
     if (!sessionUser) {
-      premiumButton.href = "/signup.html?plan=basic";
-      premiumButton.textContent = "Create Basic Account";
+      premiumButton.href = "/signup.html?plan=premium";
+      premiumButton.textContent = "Join Premium";
     } else if (String(sessionUser.plan || "").toLowerCase() === "premium") {
       premiumButton.href = "/dashboard.html";
       premiumButton.textContent = "Premium Active";
@@ -72,13 +72,14 @@ async function initBillingUi() {
 
   if (signupBillingNote) {
     signupBillingNote.textContent = config.basicCheckoutConfigured || config.premiumCheckoutConfigured
-      ? `After account creation, secure Basic checkout will open through ${config.provider}.`
-      : "After account creation, your Basic membership will open your dashboard.";
+      ? `After account creation, secure checkout will open for the selected plan through ${config.provider}.`
+      : "After account creation, your account will open your dashboard.";
   }
 }
 
 function getSelectedSignupPlan() {
-  return "basic";
+  const params = new URLSearchParams(window.location.search);
+  return String(params.get("plan") || "").trim().toLowerCase() === "premium" ? "premium" : "basic";
 }
 
 function updateSignupPlanPricing(plan) {

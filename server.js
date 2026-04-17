@@ -261,7 +261,7 @@ app.post("/api/auth/signup", createRateLimit({
   const name = String(req.body.name || "").trim();
   const email = String(req.body.email || "").trim().toLowerCase();
   const password = String(req.body.password || "");
-  const requestedPlan = "basic";
+  const requestedPlan = String(req.body.plan || "").toLowerCase() === "premium" ? "premium" : "basic";
   const plan = "basic";
 
   if (!username || !name || !email || !password) {
