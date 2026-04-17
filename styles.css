@@ -551,6 +551,22 @@ h3 {
   display: grid;
   gap: 18px;
   align-content: start;
+  border-color: rgba(220, 224, 229, 0.34);
+  box-shadow:
+    0 0 0 1px rgba(220, 224, 229, 0.08),
+    0 0 34px rgba(220, 224, 229, 0.12),
+    var(--shadow);
+  background:
+    linear-gradient(180deg, rgba(220, 224, 229, 0.08) 0%, rgba(16, 16, 16, 0.96) 24%),
+    linear-gradient(180deg, var(--panel) 0%, #101010 100%);
+}
+
+.membership-preview-card.card-premium {
+  border-color: rgba(235, 213, 155, 0.48);
+  box-shadow:
+    0 0 0 1px rgba(235, 213, 155, 0.12),
+    0 0 42px rgba(199, 164, 74, 0.22),
+    var(--shadow);
 }
 
 .membership-preview-card h3,
