@@ -116,6 +116,15 @@ function updatePriceLabel(elementId, priceLabel) {
   }
   const value = String(priceLabel || "").trim();
   if (value) {
+    if (element.classList.contains("home-plan-price") && value.includes("/")) {
+      const [price, ...suffixParts] = value.split("/");
+      element.textContent = price;
+      const suffix = document.createElement("span");
+      suffix.textContent = `/${suffixParts.join("/")}`;
+      element.appendChild(suffix);
+      return;
+    }
+
     element.textContent = value;
   }
 }
