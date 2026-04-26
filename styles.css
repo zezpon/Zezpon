@@ -1416,6 +1416,29 @@ h3 {
   gap: 14px;
 }
 
+.member-win-admin-meta {
+  display: grid;
+  gap: 6px;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.member-win-admin-meta p,
+.admin-member-win-preview p {
+  margin: 0;
+}
+
+.admin-member-win-preview {
+  display: grid;
+  gap: 12px;
+}
+
+.member-win-preview-card .member-win-card.preview {
+  padding: 20px;
+}
+
 .quote-meta {
   display: grid;
   gap: 4px;

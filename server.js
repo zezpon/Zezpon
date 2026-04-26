@@ -1949,7 +1949,12 @@ function updateMemberWin(memberWinId, payload) {
 }
 
 function findMemberWinById(memberWinId) {
-  return db.prepare("SELECT * FROM member_wins WHERE id = ?").get(memberWinId) || null;
+  return db.prepare(`
+    SELECT member_wins.*, users.username AS submitter_username, users.name AS submitter_name, users.email AS submitter_email
+    FROM member_wins
+    LEFT JOIN users ON users.id = member_wins.user_id
+    WHERE member_wins.id = ?
+  `).get(memberWinId) || null;
 }
 
 function serializePublicMemberWin(row) {
@@ -1962,9 +1967,10 @@ function serializePublicMemberWin(row) {
     publicName,
     displayHeadline: row.amount_text
       ? `${getMemberWinCategoryLabel(row.category_slug)} progress`
-      : "Smarter money move",
+      : `${getMemberWinCategoryLabel(row.category_slug)} win`,
     categorySlug: row.category_slug,
     categoryLabel: getMemberWinCategoryLabel(row.category_slug),
+    beforeText: row.before_text,
     moneyMove: row.money_move,
     changeText: row.change_text,
     amountText: row.amount_text || "",
@@ -1998,6 +2004,9 @@ function serializeAdminMemberWin(row) {
     verificationStatus: row.verification_status === "verified" ? "verified" : "standard",
     isFeatured: Boolean(row.is_featured),
     adminNotes: row.admin_notes || "",
+    submitterUsername: row.submitter_username || "",
+    submitterName: row.submitter_name || "",
+    submitterEmail: row.submitter_email || "",
     createdAt: row.created_at,
     updatedAt: row.updated_at
   };
@@ -2045,8 +2054,9 @@ function getFeaturedMemberWins() {
 
 function getAllMemberWins() {
   return db.prepare(`
-    SELECT *
+    SELECT member_wins.*, users.username AS submitter_username, users.name AS submitter_name, users.email AS submitter_email
     FROM member_wins
+    LEFT JOIN users ON users.id = member_wins.user_id
     ORDER BY
       CASE status
         WHEN 'pending' THEN 0

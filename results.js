@@ -14,6 +14,7 @@ function escapeHtml(value) {
 
 function formatCategoryLabel(slug) {
   const labels = {
+    all: "All",
     saving: "Saving",
     budgeting: "Budgeting",
     debt: "Debt",
@@ -56,6 +57,9 @@ function buildMemberWinCard(item, featured = false) {
   const amountBlock = item.amountText
     ? `<p><strong>Progress:</strong> ${escapeHtml(item.amountText)}</p>`
     : "";
+  const startingPointBlock = item.beforeText
+    ? `<p><strong>Starting point:</strong> ${escapeHtml(item.beforeText)}</p>`
+    : "";
 
   return `
     <article class="member-win-card ${featured ? "featured" : ""}">
@@ -67,6 +71,7 @@ function buildMemberWinCard(item, featured = false) {
       <p class="member-win-quote">"${escapeHtml(item.changeText)}"</p>
       <div class="member-win-details">
         <p><strong>Member:</strong> ${escapeHtml(item.publicName)}</p>
+        ${startingPointBlock}
         <p><strong>Money move:</strong> ${escapeHtml(item.moneyMove)}</p>
         ${amountBlock}
         <p><strong>Timeframe:</strong> ${escapeHtml(item.timeframeText)}</p>
@@ -87,6 +92,9 @@ function renderFeaturedWins(items) {
       <article class="member-win-card featured member-win-empty">
         <h3>Your first member win can start this wall.</h3>
         <p>There are no approved featured stories yet. Share a practical money move once you are ready.</p>
+        <div class="form-actions">
+          <a class="btn btn-primary" href="#memberWinForm">Share Your Progress</a>
+        </div>
       </article>
     `;
     return;
@@ -106,10 +114,17 @@ function renderMemberWinGrid() {
     : memberWinState.items.filter((item) => item.categorySlug === memberWinState.activeFilter);
 
   if (!filteredItems.length) {
+    const filterLabel = formatCategoryLabel(memberWinState.activeFilter);
+    const emptyHeading = memberWinState.activeFilter === "all"
+      ? "No approved member stories have been published yet."
+      : `${filterLabel} stories have not been published yet.`;
     target.innerHTML = `
       <article class="member-win-card member-win-empty">
-        <h3>No stories in this category yet.</h3>
-        <p>Try another filter or be the first member to share a progress update here.</p>
+        <h3>${escapeHtml(emptyHeading)}</h3>
+        <p>Try another filter or be the first member to share a progress update in this area.</p>
+        <div class="form-actions">
+          <a class="btn btn-secondary" href="#memberWinForm">Share Your Progress</a>
+        </div>
       </article>
     `;
     return;

@@ -157,6 +157,10 @@ function renderAdminMemberWins(items) {
     <form class="card admin-member-win-card" data-member-win-id="${item.id}">
       <p class="panel-label">${escapeHtml(item.status)} | ${escapeHtml(item.categoryLabel)}</p>
       <h3>${escapeHtml(item.displayName)}</h3>
+      <div class="member-win-admin-meta">
+        <p><strong>Username:</strong> ${escapeHtml(item.submitterUsername || "Not available")}</p>
+        <p><strong>Email:</strong> ${escapeHtml(item.submitterEmail || "Not available")}</p>
+      </div>
       <div class="field-block">
         <label>Submitted Name</label>
         <input name="displayName" type="text" value="${escapeHtml(item.displayName)}" />
@@ -242,11 +246,21 @@ function renderAdminMemberWins(items) {
         <input id="honesty-${item.id}" name="honestyConfirmed" type="checkbox" value="yes" ${item.honestyConfirmed ? "checked" : ""} />
         <span>Member confirmed the story is honest and not financial advice.</span>
       </label>
+      <div class="admin-member-win-preview">
+        <p class="panel-label">Public Preview</p>
+        <div class="member-win-preview-card" data-preview-card></div>
+      </div>
       <div class="form-actions">
+        <button class="btn btn-secondary" type="button" data-action="quick-approve">Quick Approve</button>
+        <button class="btn btn-secondary" type="button" data-action="quick-reject">Quick Reject</button>
         <button class="btn btn-primary" type="submit">Save Review</button>
       </div>
     </form>
   `).join("");
+
+  target.querySelectorAll(".admin-member-win-card").forEach((form) => {
+    syncMemberWinPreview(form);
+  });
 }
 
 function renderAuditLog(entries) {
@@ -375,6 +389,61 @@ function formatMemberWinCategory(slug) {
   return labels[slug] || "General";
 }
 
+function buildAdminMemberWinPreview(payload) {
+  const publishedName = payload.nameConsent === "yes"
+    ? (payload.publishedName || payload.displayName || "Member")
+    : "Anonymous member";
+  const verificationCopy = payload.verificationStatus === "verified"
+    ? '<span class="win-meta-chip verified">Verified by supporting information provided by the member.</span>'
+    : '<span class="win-meta-chip">Self-reported by member.</span>';
+  const amountBlock = payload.amountText
+    ? `<p><strong>Progress:</strong> ${escapeHtml(payload.amountText)}</p>`
+    : "";
+  const startingPointBlock = payload.beforeText
+    ? `<p><strong>Starting point:</strong> ${escapeHtml(payload.beforeText)}</p>`
+    : "";
+
+  return `
+    <article class="member-win-card preview">
+      <div class="member-win-top">
+        <span class="access-badge">${escapeHtml(formatMemberWinCategory(payload.categorySlug))}</span>
+        ${verificationCopy}
+      </div>
+      <h3>${escapeHtml(payload.amountText ? `${formatMemberWinCategory(payload.categorySlug)} progress` : `${formatMemberWinCategory(payload.categorySlug)} win`)}</h3>
+      <p class="member-win-quote">"${escapeHtml(payload.changeText)}"</p>
+      <div class="member-win-details">
+        <p><strong>Member:</strong> ${escapeHtml(publishedName)}</p>
+        ${startingPointBlock}
+        <p><strong>Money move:</strong> ${escapeHtml(payload.moneyMove)}</p>
+        ${amountBlock}
+        <p><strong>Timeframe:</strong> ${escapeHtml(payload.timeframeText)}</p>
+      </div>
+      <p class="member-win-note">Individual experience. Not financial advice.</p>
+    </article>
+  `;
+}
+
+function readMemberWinFormPayload(form) {
+  const formData = new FormData(form);
+  const payload = Object.fromEntries(formData.entries());
+  payload.isFeatured = form.querySelector('[name="isFeatured"]')?.checked ? "true" : "false";
+  payload.honestyConfirmed = form.querySelector('[name="honestyConfirmed"]')?.checked ? "yes" : "no";
+  return payload;
+}
+
+function syncMemberWinPreview(form) {
+  if (!(form instanceof HTMLFormElement)) {
+    return;
+  }
+
+  const previewTarget = form.querySelector("[data-preview-card]");
+  if (!(previewTarget instanceof HTMLElement)) {
+    return;
+  }
+
+  previewTarget.innerHTML = buildAdminMemberWinPreview(readMemberWinFormPayload(form));
+}
+
 document.addEventListener("DOMContentLoaded", initAdminTools);
 
 document.addEventListener("submit", async (event) => {
@@ -413,9 +482,7 @@ document.addEventListener("submit", async (event) => {
   event.preventDefault();
 
   const memberWinId = form.dataset.memberWinId;
-  const rawPayload = Object.fromEntries(new FormData(form).entries());
-  rawPayload.isFeatured = form.querySelector('[name="isFeatured"]')?.checked ? "true" : "false";
-  rawPayload.honestyConfirmed = form.querySelector('[name="honestyConfirmed"]')?.checked ? "yes" : "no";
+  const rawPayload = readMemberWinFormPayload(form);
 
   const response = await fetch(`/api/admin/member-wins/${memberWinId}`, {
     method: "POST",
@@ -437,6 +504,21 @@ document.addEventListener("submit", async (event) => {
 document.addEventListener("click", async (event) => {
   const button = event.target;
   if (!(button instanceof HTMLElement)) {
+    return;
+  }
+
+  if (button.matches('[data-action="quick-approve"], [data-action="quick-reject"]')) {
+    const form = button.closest(".admin-member-win-card");
+    if (!(form instanceof HTMLFormElement)) {
+      return;
+    }
+
+    form.status.value = button.getAttribute("data-action") === "quick-approve" ? "approved" : "rejected";
+    if (button.getAttribute("data-action") === "quick-approve") {
+      form.publishConsent.value = "yes";
+    }
+    syncMemberWinPreview(form);
+    form.requestSubmit();
     return;
   }
 
@@ -541,6 +623,10 @@ document.addEventListener("input", (event) => {
   const target = event.target;
   const form = target instanceof HTMLElement ? target.closest("#contentForm") : null;
   if (!(form instanceof HTMLFormElement)) {
+    const memberWinForm = target instanceof HTMLElement ? target.closest(".admin-member-win-card") : null;
+    if (memberWinForm instanceof HTMLFormElement) {
+      syncMemberWinPreview(memberWinForm);
+    }
     return;
   }
 
@@ -563,6 +649,10 @@ document.addEventListener("change", (event) => {
   const target = event.target;
   const form = target instanceof HTMLElement ? target.closest("#contentForm") : null;
   if (!(form instanceof HTMLFormElement)) {
+    const memberWinForm = target instanceof HTMLElement ? target.closest(".admin-member-win-card") : null;
+    if (memberWinForm instanceof HTMLFormElement) {
+      syncMemberWinPreview(memberWinForm);
+    }
     return;
   }
 
