@@ -65,6 +65,16 @@ function renderAdminInsights(insights) {
       <h3>${escapeHtml(insights?.topVideos?.[0]?.title || "None yet")}</h3>
       <p>${escapeHtml(insights?.topVideos?.[0]?.durationText || "Waiting for view data.")}</p>
     </article>
+    <article class="card">
+      <p class="panel-label">Pending Wins</p>
+      <h3>${Number(insights?.pendingMemberWins || 0)}</h3>
+      <p>Member stories waiting for review.</p>
+    </article>
+    <article class="card">
+      <p class="panel-label">Approved Wins</p>
+      <h3>${Number(insights?.approvedMemberWins || 0)}</h3>
+      <p>Stories currently approved for the website.</p>
+    </article>
   `;
 }
 
@@ -127,6 +137,118 @@ function renderAdminContent(items) {
   `).join("");
 }
 
+function renderAdminMemberWins(items) {
+  const target = document.getElementById("adminMemberWins");
+  if (!target) {
+    return;
+  }
+
+  if (!items.length) {
+    target.innerHTML = `
+      <article class="card">
+        <p class="panel-label">No submissions yet</p>
+        <p>Member story submissions will appear here once members start sharing progress.</p>
+      </article>
+    `;
+    return;
+  }
+
+  target.innerHTML = items.map((item) => `
+    <form class="card admin-member-win-card" data-member-win-id="${item.id}">
+      <p class="panel-label">${escapeHtml(item.status)} | ${escapeHtml(item.categoryLabel)}</p>
+      <h3>${escapeHtml(item.displayName)}</h3>
+      <div class="field-block">
+        <label>Submitted Name</label>
+        <input name="displayName" type="text" value="${escapeHtml(item.displayName)}" />
+      </div>
+      <div class="field-block">
+        <label>Before</label>
+        <textarea name="beforeText" rows="3">${escapeHtml(item.beforeText)}</textarea>
+      </div>
+      <div class="field-block">
+        <label>Money Move</label>
+        <textarea name="moneyMove" rows="3">${escapeHtml(item.moneyMove)}</textarea>
+      </div>
+      <div class="field-block">
+        <label>What Changed</label>
+        <textarea name="changeText" rows="3">${escapeHtml(item.changeText)}</textarea>
+      </div>
+      <div class="admin-control-row">
+        <div class="field-block">
+          <label>Category</label>
+          <select name="categorySlug">
+            ${["saving", "budgeting", "debt", "investing-basics", "side-income", "mindset"].map((slug) => `
+              <option value="${slug}" ${item.categorySlug === slug ? "selected" : ""}>${escapeHtml(formatMemberWinCategory(slug))}</option>
+            `).join("")}
+          </select>
+        </div>
+        <div class="field-block">
+          <label>Status</label>
+          <select name="status">
+            <option value="pending" ${item.status === "pending" ? "selected" : ""}>Pending</option>
+            <option value="approved" ${item.status === "approved" ? "selected" : ""}>Approved</option>
+            <option value="rejected" ${item.status === "rejected" ? "selected" : ""}>Rejected</option>
+          </select>
+        </div>
+      </div>
+      <div class="admin-control-row">
+        <div class="field-block">
+          <label>Verification</label>
+          <select name="verificationStatus">
+            <option value="standard" ${item.verificationStatus === "standard" ? "selected" : ""}>Standard</option>
+            <option value="verified" ${item.verificationStatus === "verified" ? "selected" : ""}>Verified</option>
+          </select>
+        </div>
+        <div class="field-block">
+          <label>Published Name</label>
+          <input name="publishedName" type="text" value="${escapeHtml(item.publishedName || "")}" placeholder="Leave blank to use submitted name" />
+        </div>
+      </div>
+      <div class="admin-control-row">
+        <div class="field-block">
+          <label>Amount</label>
+          <input name="amountText" type="text" value="${escapeHtml(item.amountText || "")}" placeholder="Optional amount or progress note" />
+        </div>
+        <div class="field-block">
+          <label>Timeframe</label>
+          <input name="timeframeText" type="text" value="${escapeHtml(item.timeframeText)}" />
+        </div>
+      </div>
+      <div class="admin-control-row">
+        <div class="field-block">
+          <label>Publish Consent</label>
+          <select name="publishConsent">
+            <option value="yes" ${item.publishConsent ? "selected" : ""}>Yes</option>
+            <option value="no" ${!item.publishConsent ? "selected" : ""}>No</option>
+          </select>
+        </div>
+        <div class="field-block">
+          <label>Name Consent</label>
+          <select name="nameConsent">
+            <option value="yes" ${item.nameConsent ? "selected" : ""}>Yes</option>
+            <option value="no" ${!item.nameConsent ? "selected" : ""}>No</option>
+          </select>
+        </div>
+      </div>
+      <div class="field-block">
+        <label>Admin Notes</label>
+        <textarea name="adminNotes" rows="3">${escapeHtml(item.adminNotes || "")}</textarea>
+      </div>
+      <label class="checkbox-field" for="featured-${item.id}">
+        <input id="featured-${item.id}" name="isFeatured" type="checkbox" value="true" ${item.isFeatured ? "checked" : ""} />
+        <span>Show this story in featured member wins</span>
+      </label>
+      <label class="checkbox-field" for="honesty-${item.id}">
+        <input id="honesty-${item.id}" name="honestyConfirmed" type="checkbox" value="yes" ${item.honestyConfirmed ? "checked" : ""} />
+        <span>Member confirmed the story is honest and not financial advice.</span>
+      </label>
+      <div class="form-actions">
+        <button class="btn btn-primary" type="submit">Save Review</button>
+      </div>
+    </form>
+  `).join("");
+}
+
 function renderAuditLog(entries) {
   const target = document.getElementById("adminAuditLog");
   if (!target) {
@@ -180,6 +302,7 @@ async function initAdminTools() {
   renderAdminInsights(result.contentInsights || {});
   renderAdminUsers(result.users);
   renderAdminContent(result.contentItems || []);
+  renderAdminMemberWins(result.memberWins || []);
   renderAuditLog(result.recentAuditLogs || []);
 }
 
@@ -240,6 +363,18 @@ function escapeHtml(value) {
     .replaceAll("'", "&#39;");
 }
 
+function formatMemberWinCategory(slug) {
+  const labels = {
+    saving: "Saving",
+    budgeting: "Budgeting",
+    debt: "Debt",
+    "investing-basics": "Investing Basics",
+    "side-income": "Side Income",
+    mindset: "Mindset"
+  };
+  return labels[slug] || "General";
+}
+
 document.addEventListener("DOMContentLoaded", initAdminTools);
 
 document.addEventListener("submit", async (event) => {
@@ -262,6 +397,36 @@ document.addEventListener("submit", async (event) => {
   const updateResult = await response.json();
   if (!response.ok) {
     setAdminMessage(updateResult.error || "Unable to update member access.", "error");
+    return;
+  }
+
+  setAdminMessage(updateResult.message, "success");
+  initAdminTools();
+});
+
+document.addEventListener("submit", async (event) => {
+  const form = event.target;
+  if (!(form instanceof HTMLFormElement) || !form.classList.contains("admin-member-win-card")) {
+    return;
+  }
+
+  event.preventDefault();
+
+  const memberWinId = form.dataset.memberWinId;
+  const rawPayload = Object.fromEntries(new FormData(form).entries());
+  rawPayload.isFeatured = form.querySelector('[name="isFeatured"]')?.checked ? "true" : "false";
+  rawPayload.honestyConfirmed = form.querySelector('[name="honestyConfirmed"]')?.checked ? "yes" : "no";
+
+  const response = await fetch(`/api/admin/member-wins/${memberWinId}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "same-origin",
+    body: JSON.stringify(rawPayload)
+  });
+
+  const updateResult = await response.json();
+  if (!response.ok) {
+    setAdminMessage(updateResult.error || "Unable to update member win.", "error");
     return;
   }
 

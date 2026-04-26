@@ -43,6 +43,14 @@ const VIDEO_CATEGORY_OPTIONS = [
   { slug: "beginner", label: "Beginner" },
   { slug: "strategy", label: "Strategy" }
 ];
+const MEMBER_WIN_CATEGORY_OPTIONS = [
+  { slug: "saving", label: "Saving" },
+  { slug: "budgeting", label: "Budgeting" },
+  { slug: "debt", label: "Debt" },
+  { slug: "investing-basics", label: "Investing Basics" },
+  { slug: "side-income", label: "Side Income" },
+  { slug: "mindset", label: "Mindset" }
+];
 
 const PUBLIC_FILES = new Set([
   "Zezpon.html",
@@ -170,6 +178,7 @@ app.use("/content-feed.js", express.static(path.join(ROOT, "content-feed.js")));
 app.use("/video-detail.js", express.static(path.join(ROOT, "video-detail.js")));
 app.use("/videos.js", express.static(path.join(ROOT, "videos.js")));
 app.use("/billing.js", express.static(path.join(ROOT, "billing.js")));
+app.use("/results.js", express.static(path.join(ROOT, "results.js")));
 
 for (const [from, to] of OLD_REDIRECTS.entries()) {
   app.get(from, (_req, res) => res.redirect(301, to));
@@ -641,6 +650,58 @@ app.get("/api/content-item/:slug", (req, res) => {
   });
 });
 
+app.get("/api/member-wins", (req, res) => {
+  const categorySlug = normalizeMemberWinCategory(req.query.category);
+  return res.json({
+    items: getApprovedMemberWins(categorySlug),
+    featuredItems: getFeaturedMemberWins(),
+    stats: getMemberWinPublicStats()
+  });
+});
+
+app.post("/api/member-wins", createRateLimit({
+  windowMs: AUTH_WINDOW_MS,
+  max: AUTH_MAX_ATTEMPTS,
+  key: (req) => `member-win-submit:${getRequestIp(req)}`
+}), (req, res) => {
+  const currentUser = getSessionUser(req);
+  if (!currentUser) {
+    return res.status(401).json({ error: "Login required." });
+  }
+
+  const payload = validateMemberWinSubmission(req.body);
+  if (payload.error) {
+    return res.status(400).json({ error: payload.error });
+  }
+
+  const memberWin = {
+    id: crypto.randomUUID(),
+    userId: currentUser.id,
+    ...payload.value,
+    status: "pending",
+    verificationStatus: "standard",
+    isFeatured: false,
+    publishedName: "",
+    adminNotes: "",
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  };
+
+  insertMemberWin(memberWin);
+  logAuditEvent({
+    actorUserId: currentUser.id,
+    targetUserId: currentUser.id,
+    action: "member_win.submitted",
+    metadata: { memberWinId: memberWin.id, categorySlug: memberWin.categorySlug }
+  });
+
+  return res.status(201).json({
+    message: memberWin.publishConsent
+      ? "Your member win has been submitted for review."
+      : "Your progress has been saved. Because you selected no publication, it will stay private unless you update it later."
+  });
+});
+
 app.post("/api/content-item/:slug/view", (req, res) => {
   const slug = String(req.params.slug || "").trim().toLowerCase();
   if (!slug) {
@@ -784,6 +845,21 @@ app.get("/api/admin/content", (req, res) => {
 
   return res.json({
     items: getAllManagedContent()
+  });
+});
+
+app.get("/api/admin/member-wins", (req, res) => {
+  const currentUser = getSessionUser(req);
+  if (!currentUser) {
+    return res.status(401).json({ error: "Login required." });
+  }
+  if (normalizeRole(currentUser.role) !== "admin") {
+    return res.status(403).json({ error: "Admin access required." });
+  }
+
+  return res.json({
+    items: getAllMemberWins(),
+    stats: getMemberWinAdminStats()
   });
 });
 
@@ -953,6 +1029,47 @@ app.post("/api/admin/users/:id", createRateLimit({
   return res.json({
     message: "Member updated successfully.",
     user: sanitizeUser(findUserById(targetUser.id))
+  });
+});
+
+app.post("/api/admin/member-wins/:id", createRateLimit({
+  windowMs: ADMIN_WINDOW_MS,
+  max: ADMIN_MAX_ATTEMPTS,
+  key: (req) => `admin-member-win-update:${getRequestIp(req)}`
+}), (req, res) => {
+  const currentUser = getSessionUser(req);
+  if (!currentUser) {
+    return res.status(401).json({ error: "Login required." });
+  }
+  if (normalizeRole(currentUser.role) !== "admin") {
+    return res.status(403).json({ error: "Admin access required." });
+  }
+
+  const existingMemberWin = findMemberWinById(req.params.id);
+  if (!existingMemberWin) {
+    return res.status(404).json({ error: "Member win not found." });
+  }
+
+  const payload = validateAdminMemberWinUpdate(req.body, existingMemberWin);
+  if (payload.error) {
+    return res.status(400).json({ error: payload.error });
+  }
+
+  updateMemberWin(req.params.id, payload.value);
+  logAuditEvent({
+    actorUserId: currentUser.id,
+    targetUserId: existingMemberWin.user_id,
+    action: "member_win.reviewed",
+    metadata: {
+      memberWinId: req.params.id,
+      status: payload.value.status,
+      verificationStatus: payload.value.verificationStatus
+    }
+  });
+
+  return res.json({
+    message: "Member win updated successfully.",
+    item: serializeAdminMemberWin(findMemberWinById(req.params.id))
   });
 });
 
@@ -1218,6 +1335,29 @@ function initDatabase() {
       created_at TEXT NOT NULL,
       updated_at TEXT NOT NULL
     );
+
+    CREATE TABLE IF NOT EXISTS member_wins (
+      id TEXT PRIMARY KEY,
+      user_id TEXT NOT NULL,
+      display_name TEXT NOT NULL,
+      category_slug TEXT NOT NULL,
+      before_text TEXT NOT NULL,
+      money_move TEXT NOT NULL,
+      change_text TEXT NOT NULL,
+      amount_text TEXT NOT NULL DEFAULT '',
+      timeframe_text TEXT NOT NULL,
+      publish_consent INTEGER NOT NULL DEFAULT 0,
+      name_consent INTEGER NOT NULL DEFAULT 0,
+      honesty_confirmed INTEGER NOT NULL DEFAULT 0,
+      status TEXT NOT NULL DEFAULT 'pending',
+      verification_status TEXT NOT NULL DEFAULT 'standard',
+      is_featured INTEGER NOT NULL DEFAULT 0,
+      published_name TEXT NOT NULL DEFAULT '',
+      admin_notes TEXT NOT NULL DEFAULT '',
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL,
+      FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+    );
   `);
 
   addColumnIfMissing("users", "username", "TEXT");
@@ -1232,6 +1372,15 @@ function initDatabase() {
   addColumnIfMissing("content_items", "duration_text", "TEXT NOT NULL DEFAULT ''");
   addColumnIfMissing("content_items", "is_featured", "INTEGER NOT NULL DEFAULT 0");
   addColumnIfMissing("content_items", "view_count", "INTEGER NOT NULL DEFAULT 0");
+  addColumnIfMissing("member_wins", "amount_text", "TEXT NOT NULL DEFAULT ''");
+  addColumnIfMissing("member_wins", "publish_consent", "INTEGER NOT NULL DEFAULT 0");
+  addColumnIfMissing("member_wins", "name_consent", "INTEGER NOT NULL DEFAULT 0");
+  addColumnIfMissing("member_wins", "honesty_confirmed", "INTEGER NOT NULL DEFAULT 0");
+  addColumnIfMissing("member_wins", "status", "TEXT NOT NULL DEFAULT 'pending'");
+  addColumnIfMissing("member_wins", "verification_status", "TEXT NOT NULL DEFAULT 'standard'");
+  addColumnIfMissing("member_wins", "is_featured", "INTEGER NOT NULL DEFAULT 0");
+  addColumnIfMissing("member_wins", "published_name", "TEXT NOT NULL DEFAULT ''");
+  addColumnIfMissing("member_wins", "admin_notes", "TEXT NOT NULL DEFAULT ''");
 }
 
 function migrateLegacyData() {
@@ -1476,6 +1625,7 @@ function buildAdminPayload() {
     premiumUsers: users.filter((user) => user.plan === "premium").length,
     adminUsers: users.filter((user) => normalizeRole(user.role) === "admin").length
   };
+  const memberWinStats = getMemberWinAdminStats();
 
   return {
     stats,
@@ -1491,11 +1641,18 @@ function buildAdminPayload() {
     contentConfig: {
       modules: MODULE_OPTIONS,
       guides: GUIDE_OPTIONS,
-      videoCategories: VIDEO_CATEGORY_OPTIONS
+      videoCategories: VIDEO_CATEGORY_OPTIONS,
+      memberWinCategories: MEMBER_WIN_CATEGORY_OPTIONS
     },
     contentItems: getAllManagedContent(),
+    memberWins: getAllMemberWins(),
+    memberWinStats,
     recentAuditLogs: getRecentAuditLogs(),
-    contentInsights: getContentInsights()
+    contentInsights: {
+      ...getContentInsights(),
+      pendingMemberWins: memberWinStats.pending,
+      approvedMemberWins: memberWinStats.approved
+    }
   };
 }
 
@@ -1621,6 +1778,326 @@ function getContentInsights() {
     totalViews: Number(totalViews || 0),
     featuredVideos: Number(featuredVideos || 0),
     topVideos
+  };
+}
+
+function normalizeMemberWinCategory(value) {
+  const slug = String(value || "").trim().toLowerCase();
+  if (!slug) {
+    return "";
+  }
+  return MEMBER_WIN_CATEGORY_OPTIONS.some((option) => option.slug === slug) ? slug : "";
+}
+
+function getMemberWinCategoryLabel(categorySlug) {
+  return MEMBER_WIN_CATEGORY_OPTIONS.find((option) => option.slug === categorySlug)?.label || "General";
+}
+
+function validateMemberWinSubmission(input) {
+  const displayName = String(input.displayName || "").trim();
+  const categorySlug = normalizeMemberWinCategory(input.categorySlug);
+  const beforeText = String(input.beforeText || "").trim();
+  const moneyMove = String(input.moneyMove || "").trim();
+  const changeText = String(input.changeText || "").trim();
+  const amountText = String(input.amountText || "").trim();
+  const timeframeText = String(input.timeframeText || "").trim();
+  const publishConsent = String(input.publishConsent || "").trim().toLowerCase() === "yes";
+  const nameConsent = String(input.nameConsent || "").trim().toLowerCase() === "yes";
+  const honestyConfirmed = String(input.honestyConfirmed || "").trim().toLowerCase() === "yes";
+
+  if (!displayName || !categorySlug || !beforeText || !moneyMove || !changeText || !timeframeText) {
+    return { error: "Please complete all required story fields." };
+  }
+  if (displayName.length > 40) {
+    return { error: "Name or nickname must be 40 characters or fewer." };
+  }
+  if (beforeText.length > 800 || changeText.length > 800) {
+    return { error: "Story sections must stay under 800 characters each." };
+  }
+  if (moneyMove.length > 500) {
+    return { error: "Money move must stay under 500 characters." };
+  }
+  if (amountText.length > 80 || timeframeText.length > 80) {
+    return { error: "Amount and timeframe entries need to stay concise." };
+  }
+  if (!honestyConfirmed) {
+    return { error: "Please confirm the story is honest and not financial advice." };
+  }
+
+  return {
+    value: {
+      displayName,
+      categorySlug,
+      beforeText,
+      moneyMove,
+      changeText,
+      amountText,
+      timeframeText,
+      publishConsent,
+      nameConsent,
+      honestyConfirmed
+    }
+  };
+}
+
+function validateAdminMemberWinUpdate(input, existingRow) {
+  const displayName = String(input.displayName || existingRow.display_name || "").trim();
+  const publishedName = String(input.publishedName || "").trim();
+  const categorySlug = normalizeMemberWinCategory(input.categorySlug || existingRow.category_slug);
+  const beforeText = String(input.beforeText || existingRow.before_text || "").trim();
+  const moneyMove = String(input.moneyMove || existingRow.money_move || "").trim();
+  const changeText = String(input.changeText || existingRow.change_text || "").trim();
+  const amountText = String(input.amountText || existingRow.amount_text || "").trim();
+  const timeframeText = String(input.timeframeText || existingRow.timeframe_text || "").trim();
+  const publishConsent = String(input.publishConsent || "").trim().toLowerCase() === "yes";
+  const nameConsent = String(input.nameConsent || "").trim().toLowerCase() === "yes";
+  const honestyConfirmed = String(input.honestyConfirmed || "").trim().toLowerCase() === "yes";
+  const status = ["pending", "approved", "rejected"].includes(String(input.status || "").trim().toLowerCase())
+    ? String(input.status || "").trim().toLowerCase()
+    : "pending";
+  const verificationStatus = String(input.verificationStatus || "").trim().toLowerCase() === "verified"
+    ? "verified"
+    : "standard";
+  const isFeatured = String(input.isFeatured || "").trim().toLowerCase() === "true";
+  const adminNotes = String(input.adminNotes || "").trim().slice(0, 1000);
+
+  if (!displayName || !categorySlug || !beforeText || !moneyMove || !changeText || !timeframeText) {
+    return { error: "All story fields must stay filled in during review." };
+  }
+  if (status === "approved" && !publishConsent) {
+    return { error: "A story cannot be approved for the website unless publication consent is set to yes." };
+  }
+
+  return {
+    value: {
+      displayName,
+      categorySlug,
+      beforeText,
+      moneyMove,
+      changeText,
+      amountText,
+      timeframeText,
+      publishConsent,
+      nameConsent,
+      honestyConfirmed,
+      status,
+      verificationStatus,
+      isFeatured,
+      publishedName,
+      adminNotes
+    }
+  };
+}
+
+function insertMemberWin(item) {
+  db.prepare(`
+    INSERT INTO member_wins (
+      id, user_id, display_name, category_slug, before_text, money_move, change_text, amount_text,
+      timeframe_text, publish_consent, name_consent, honesty_confirmed, status, verification_status,
+      is_featured, published_name, admin_notes, created_at, updated_at
+    )
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `).run(
+    item.id,
+    item.userId,
+    item.displayName,
+    item.categorySlug,
+    item.beforeText,
+    item.moneyMove,
+    item.changeText,
+    item.amountText,
+    item.timeframeText,
+    item.publishConsent ? 1 : 0,
+    item.nameConsent ? 1 : 0,
+    item.honestyConfirmed ? 1 : 0,
+    item.status,
+    item.verificationStatus,
+    item.isFeatured ? 1 : 0,
+    item.publishedName,
+    item.adminNotes,
+    item.createdAt,
+    item.updatedAt
+  );
+}
+
+function updateMemberWin(memberWinId, payload) {
+  db.prepare(`
+    UPDATE member_wins
+    SET display_name = ?, category_slug = ?, before_text = ?, money_move = ?, change_text = ?, amount_text = ?,
+        timeframe_text = ?, publish_consent = ?, name_consent = ?, honesty_confirmed = ?, status = ?,
+        verification_status = ?, is_featured = ?, published_name = ?, admin_notes = ?, updated_at = ?
+    WHERE id = ?
+  `).run(
+    payload.displayName,
+    payload.categorySlug,
+    payload.beforeText,
+    payload.moneyMove,
+    payload.changeText,
+    payload.amountText,
+    payload.timeframeText,
+    payload.publishConsent ? 1 : 0,
+    payload.nameConsent ? 1 : 0,
+    payload.honestyConfirmed ? 1 : 0,
+    payload.status,
+    payload.verificationStatus,
+    payload.isFeatured ? 1 : 0,
+    payload.publishedName,
+    payload.adminNotes,
+    new Date().toISOString(),
+    memberWinId
+  );
+}
+
+function findMemberWinById(memberWinId) {
+  return db.prepare("SELECT * FROM member_wins WHERE id = ?").get(memberWinId) || null;
+}
+
+function serializePublicMemberWin(row) {
+  const publicName = row.name_consent
+    ? (row.published_name || row.display_name || "Member")
+    : "Anonymous member";
+
+  return {
+    id: row.id,
+    publicName,
+    displayHeadline: row.amount_text
+      ? `${getMemberWinCategoryLabel(row.category_slug)} progress`
+      : "Smarter money move",
+    categorySlug: row.category_slug,
+    categoryLabel: getMemberWinCategoryLabel(row.category_slug),
+    moneyMove: row.money_move,
+    changeText: row.change_text,
+    amountText: row.amount_text || "",
+    timeframeText: row.timeframe_text,
+    verificationStatus: row.verification_status === "verified" ? "verified" : "standard",
+    createdAt: row.created_at
+  };
+}
+
+function serializeAdminMemberWin(row) {
+  if (!row) {
+    return null;
+  }
+
+  return {
+    id: row.id,
+    userId: row.user_id,
+    displayName: row.display_name,
+    publishedName: row.published_name || "",
+    categorySlug: row.category_slug,
+    categoryLabel: getMemberWinCategoryLabel(row.category_slug),
+    beforeText: row.before_text,
+    moneyMove: row.money_move,
+    changeText: row.change_text,
+    amountText: row.amount_text || "",
+    timeframeText: row.timeframe_text,
+    publishConsent: Boolean(row.publish_consent),
+    nameConsent: Boolean(row.name_consent),
+    honestyConfirmed: Boolean(row.honesty_confirmed),
+    status: row.status,
+    verificationStatus: row.verification_status === "verified" ? "verified" : "standard",
+    isFeatured: Boolean(row.is_featured),
+    adminNotes: row.admin_notes || "",
+    createdAt: row.created_at,
+    updatedAt: row.updated_at
+  };
+}
+
+function getApprovedMemberWins(categorySlug = "") {
+  const filters = ["status = 'approved'", "publish_consent = 1"];
+  const params = [];
+  if (categorySlug) {
+    filters.push("category_slug = ?");
+    params.push(categorySlug);
+  }
+
+  return db.prepare(`
+    SELECT *
+    FROM member_wins
+    WHERE ${filters.join(" AND ")}
+    ORDER BY is_featured DESC, updated_at DESC, created_at DESC
+  `).all(...params).map(serializePublicMemberWin);
+}
+
+function getFeaturedMemberWins() {
+  const featured = db.prepare(`
+    SELECT *
+    FROM member_wins
+    WHERE status = 'approved' AND publish_consent = 1 AND is_featured = 1
+    ORDER BY updated_at DESC, created_at DESC
+    LIMIT 3
+  `).all().map(serializePublicMemberWin);
+
+  if (featured.length >= 3) {
+    return featured;
+  }
+
+  const fallback = db.prepare(`
+    SELECT *
+    FROM member_wins
+    WHERE status = 'approved' AND publish_consent = 1
+    ORDER BY is_featured DESC, updated_at DESC, created_at DESC
+    LIMIT 3
+  `).all().map(serializePublicMemberWin);
+
+  return fallback;
+}
+
+function getAllMemberWins() {
+  return db.prepare(`
+    SELECT *
+    FROM member_wins
+    ORDER BY
+      CASE status
+        WHEN 'pending' THEN 0
+        WHEN 'approved' THEN 1
+        ELSE 2
+      END,
+      updated_at DESC,
+      created_at DESC
+  `).all().map(serializeAdminMemberWin);
+}
+
+function getMemberWinPublicStats() {
+  const publishedStories = Number(db.prepare(`
+    SELECT COUNT(*) AS count
+    FROM member_wins
+    WHERE status = 'approved' AND publish_consent = 1
+  `).get().count || 0);
+
+  const budgetingWinsThisMonth = Number(db.prepare(`
+    SELECT COUNT(*) AS count
+    FROM member_wins
+    WHERE status = 'approved'
+      AND publish_consent = 1
+      AND category_slug = 'budgeting'
+      AND strftime('%Y-%m', created_at) = strftime('%Y-%m', 'now')
+  `).get().count || 0);
+
+  return {
+    publishedStories,
+    approvedMoves: publishedStories,
+    budgetingWinsThisMonth
+  };
+}
+
+function getMemberWinAdminStats() {
+  const totals = db.prepare(`
+    SELECT
+      COUNT(*) AS total,
+      SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) AS pending,
+      SUM(CASE WHEN status = 'approved' THEN 1 ELSE 0 END) AS approved,
+      SUM(CASE WHEN status = 'rejected' THEN 1 ELSE 0 END) AS rejected,
+      SUM(CASE WHEN verification_status = 'verified' THEN 1 ELSE 0 END) AS verified
+    FROM member_wins
+  `).get();
+
+  return {
+    total: Number(totals.total || 0),
+    pending: Number(totals.pending || 0),
+    approved: Number(totals.approved || 0),
+    rejected: Number(totals.rejected || 0),
+    verified: Number(totals.verified || 0)
   };
 }
 

@@ -1292,6 +1292,128 @@ h3 {
   color: var(--text);
 }
 
+.notice-panel,
+.form-panel,
+.member-win-card {
+  background: linear-gradient(180deg, rgba(26, 26, 26, 0.98) 0%, rgba(14, 14, 14, 0.98) 100%);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.notice-panel,
+.form-panel {
+  padding: 22px;
+}
+
+.filter-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 22px;
+}
+
+.filter-chip {
+  appearance: none;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--muted);
+  border-radius: 999px;
+  padding: 10px 16px;
+  font: inherit;
+  cursor: pointer;
+  transition: border-color 180ms ease, color 180ms ease, background 180ms ease;
+}
+
+.filter-chip:hover,
+.filter-chip.active {
+  color: var(--text);
+  border-color: rgba(214, 186, 112, 0.55);
+  background: rgba(214, 186, 112, 0.12);
+}
+
+.form-intro {
+  margin-top: 0;
+  margin-bottom: 18px;
+  color: var(--muted);
+}
+
+.member-win-card {
+  padding: 24px;
+}
+
+.member-win-card.featured {
+  border-color: rgba(214, 186, 112, 0.4);
+  box-shadow: 0 22px 54px rgba(0, 0, 0, 0.38), 0 0 0 1px rgba(214, 186, 112, 0.08);
+}
+
+.member-win-top,
+.member-win-details {
+  display: grid;
+  gap: 12px;
+}
+
+.member-win-top {
+  margin-bottom: 18px;
+}
+
+.win-meta-chip {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  min-height: 30px;
+  padding: 0 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--muted);
+  font-size: 12px;
+  letter-spacing: 0.03em;
+}
+
+.win-meta-chip.verified {
+  color: var(--gold-soft);
+  border-color: rgba(214, 186, 112, 0.38);
+  background: rgba(214, 186, 112, 0.08);
+}
+
+.member-win-card h3 {
+  margin: 0 0 12px;
+}
+
+.member-win-quote {
+  margin: 0 0 20px;
+  font-size: 20px;
+  line-height: 1.6;
+  color: var(--text);
+}
+
+.member-win-details p,
+.member-win-note,
+.member-win-empty p {
+  margin: 0;
+}
+
+.member-win-note {
+  margin-top: 20px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.member-win-empty {
+  display: grid;
+  place-items: start;
+  min-height: 220px;
+}
+
+.member-win-empty h3 {
+  margin-top: 0;
+}
+
+.admin-member-win-card {
+  display: grid;
+  gap: 14px;
+}
+
 .quote-meta {
   display: grid;
   gap: 4px;

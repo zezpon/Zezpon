@@ -4,18 +4,46 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests" />
-  <meta name="description" content="Member wins at Zezpon, focused on satisfaction, clarity, and a learning experience worth returning to." />
+  <meta name="description" content="Read member-reported progress, smarter money habits, and practical wins shared by Zezpon members." />
   <title>Member Wins | Zezpon</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <header class="site-header"><div class="container nav-wrap"><a href="Zezpon.html" class="brand"><div class="brand-mark">Z</div><div class="brand-copy"><strong>Zezpon</strong><span>Australian Market Academy</span></div></a><button class="menu-toggle" type="button" aria-expanded="false" aria-controls="siteNav">Menu</button><nav id="siteNav" class="site-nav"><a href="Zezpon.html">Home</a><a href="modules.html">Modules</a><a href="news.html">News</a><a class="active" href="results.html">Member Wins</a><a href="videos.html">Videos</a><a href="membership.html">Membership</a><a href="guides.html">Guides</a><a href="contact.html">Contact</a></nav><div class="nav-actions"><a class="btn btn-secondary" href="modules.html">View Modules</a><a class="btn btn-primary" href="membership.html">View Plans</a></div></div></header>
+  <header class="site-header"><div class="container nav-wrap"><a href="Zezpon.html" class="brand"><div class="brand-mark">Z</div><div class="brand-copy"><strong>Zezpon</strong><span>Australian Market Academy</span></div></a><button class="menu-toggle" type="button" aria-expanded="false" aria-controls="siteNav">Menu</button><nav id="siteNav" class="site-nav"><a href="Zezpon.html">Home</a><a href="modules.html">Modules</a><a href="news.html">News</a><a class="active" href="results.html">Member Wins</a><a href="videos.html">Videos</a><a href="membership.html">Membership</a><a href="guides.html">Guides</a><a href="contact.html">Contact</a></nav><div class="nav-actions"><a class="btn btn-secondary" href="dashboard.html">Dashboard</a><a class="btn btn-primary" href="#memberWinForm">Share Your Progress</a></div></div></header>
   <main>
-    <section class="page-hero page-hero-compact">
+    <section class="page-hero">
       <div class="container">
         <p class="eyebrow">Member Wins</p>
-        <h1>Member wins</h1>
-        <p>Clear lessons, practical structure, and a member experience worth returning to.</p>
+        <h1>Real progress from members making smarter money moves.</h1>
+        <p>Small wins, clearer habits, and practical money decisions shared by the Zezpon community.</p>
+        <div class="form-actions">
+          <a class="btn btn-primary" href="#memberWinForm">Share Your Progress</a>
+        </div>
+        <div class="notice-panel">
+          <p>These stories are personal experiences from Zezpon members. They are not financial advice, and individual outcomes vary.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container">
+        <div class="stats-grid" id="memberWinCounters">
+          <article class="stat-card">
+            <span class="stat-label">Stories Shared</span>
+            <strong>0</strong>
+            <span>Published member stories.</span>
+          </article>
+          <article class="stat-card">
+            <span class="stat-label">Smart Money Moves</span>
+            <strong>0</strong>
+            <span>Approved progress updates.</span>
+          </article>
+          <article class="stat-card">
+            <span class="stat-label">Budgeting Wins This Month</span>
+            <strong>0</strong>
+            <span>Budgeting stories approved this month.</span>
+          </article>
+        </div>
       </div>
     </section>
 
@@ -23,40 +51,129 @@
       <div class="container">
         <div class="section-head">
           <div>
-            <span class="section-kicker">What members should feel</span>
-            <h2>A better experience, not more noise</h2>
+            <span class="section-kicker">Featured member wins</span>
+            <h2>The Money Moves Wall</h2>
           </div>
         </div>
-        <div class="card-grid cols-2">
-          <article class="quote-card">
-            <p>Clearer understanding</p>
-            <div class="quote-meta">
-              <span>Markets, CPI, rates, and money topics should feel easier to follow after each lesson.</span>
-            </div>
-          </article>
-          <article class="quote-card">
-            <p>More practical routines</p>
-            <div class="quote-meta">
-              <span>Budgeting, reviews, and decision-making should feel usable in everyday life.</span>
-            </div>
-          </article>
-          <article class="quote-card">
-            <p>Less noise, more structure</p>
-            <div class="quote-meta">
-              <span>Members should have a clear path instead of jumping between disconnected content.</span>
-            </div>
-          </article>
-          <article class="quote-card">
-            <p>Confidence to keep going</p>
-            <div class="quote-meta">
-              <span>A strong experience should make it easier to stay consistent and keep learning.</span>
-            </div>
-          </article>
+        <div class="card-grid cols-3" id="featuredMemberWins"></div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container">
+        <div class="section-head">
+          <div>
+            <span class="section-kicker">Browse all stories</span>
+            <h2>Member-reported progress</h2>
+          </div>
         </div>
+        <div class="filter-chips" id="memberWinFilters">
+          <button class="filter-chip active" type="button" data-filter="all">All</button>
+          <button class="filter-chip" type="button" data-filter="saving">Saving</button>
+          <button class="filter-chip" type="button" data-filter="budgeting">Budgeting</button>
+          <button class="filter-chip" type="button" data-filter="debt">Debt</button>
+          <button class="filter-chip" type="button" data-filter="investing-basics">Investing Basics</button>
+          <button class="filter-chip" type="button" data-filter="side-income">Side Income</button>
+          <button class="filter-chip" type="button" data-filter="mindset">Mindset</button>
+        </div>
+        <div class="card-grid cols-2" id="memberWinGrid"></div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container detail-layout">
+        <div class="detail-copy">
+          <section class="form-panel">
+            <p class="panel-label">Share your progress</p>
+            <h2>Submit your own member win</h2>
+            <p class="form-intro">Your story is saved as pending first. Nothing is published until it has been reviewed and approved.</p>
+            <form id="memberWinForm">
+              <div class="admin-control-row">
+                <div class="field-block">
+                  <label for="storyDisplayName">First name or nickname</label>
+                  <input id="storyDisplayName" name="displayName" type="text" maxlength="40" required />
+                </div>
+                <div class="field-block">
+                  <label for="storyCategory">Member type</label>
+                  <select id="storyCategory" name="categorySlug" required>
+                    <option value="">Select one</option>
+                    <option value="saving">Saving</option>
+                    <option value="budgeting">Budgeting</option>
+                    <option value="debt">Debt Reduction</option>
+                    <option value="investing-basics">Investing Basics</option>
+                    <option value="side-income">Side Income</option>
+                    <option value="mindset">Mindset</option>
+                  </select>
+                </div>
+              </div>
+              <div class="field-block">
+                <label for="storyBefore">What was your situation before?</label>
+                <textarea id="storyBefore" name="beforeText" rows="4" maxlength="800" required></textarea>
+              </div>
+              <div class="field-block">
+                <label for="storyMove">What money move did you make?</label>
+                <textarea id="storyMove" name="moneyMove" rows="3" maxlength="500" required></textarea>
+              </div>
+              <div class="field-block">
+                <label for="storyChange">What changed?</label>
+                <textarea id="storyChange" name="changeText" rows="4" maxlength="800" required></textarea>
+              </div>
+              <div class="admin-control-row">
+                <div class="field-block">
+                  <label for="storyAmount">Optional amount saved or reduced</label>
+                  <input id="storyAmount" name="amountText" type="text" maxlength="80" placeholder="For example: Approximately $85 a week" />
+                </div>
+                <div class="field-block">
+                  <label for="storyTimeframe">Timeframe</label>
+                  <input id="storyTimeframe" name="timeframeText" type="text" maxlength="80" placeholder="For example: 6 weeks" required />
+                </div>
+              </div>
+              <div class="admin-control-row">
+                <div class="field-block">
+                  <label for="storyPublishConsent">Can we publish this on the website?</label>
+                  <select id="storyPublishConsent" name="publishConsent" required>
+                    <option value="yes">Yes</option>
+                    <option value="no">No</option>
+                  </select>
+                </div>
+                <div class="field-block">
+                  <label for="storyNameConsent">Can we use your first name or nickname?</label>
+                  <select id="storyNameConsent" name="nameConsent" required>
+                    <option value="yes">Yes</option>
+                    <option value="no">No</option>
+                  </select>
+                </div>
+              </div>
+              <div class="field-block">
+                <label class="checkbox-field" for="storyHonesty">
+                  <input id="storyHonesty" name="honestyConfirmed" type="checkbox" value="yes" required />
+                  <span>I confirm this story is honest and should not be treated as financial advice.</span>
+                </label>
+              </div>
+              <div class="form-actions">
+                <button class="btn btn-primary" type="submit">Submit For Review</button>
+              </div>
+              <div class="auth-message" id="memberWinMessage"></div>
+            </form>
+          </section>
+        </div>
+        <aside class="detail-sidebar">
+          <p class="panel-label">How it works</p>
+          <ul class="info-list">
+            <li>Share a practical win, habit change, or smarter money move.</li>
+            <li>Your submission is stored as pending first.</li>
+            <li>Zezpon reviews each story before it can appear publicly.</li>
+            <li>Stories stay focused on education, habits, and personal experience.</li>
+          </ul>
+          <div class="notice-panel">
+            <p>Zezpon provides general educational content only. Member stories are personal experiences and should not be taken as financial advice. Results vary depending on individual circumstances.</p>
+          </div>
+        </aside>
       </div>
     </section>
   </main>
-  <footer class="site-footer"><div class="container footer-grid"><div><p class="footer-title">Member Wins</p><p class="footer-copy">A simpler view of the Zezpon member experience.</p></div><div><p class="footer-title">Explore</p><div class="footer-links"><a href="membership.html">Membership</a><a href="modules.html">Modules</a></div></div><div><p class="footer-title">Contact</p><div class="footer-links"><a href="contact.html">Contact page</a><a href="privacy.html">Privacy</a></div></div></div></footer>
+  <footer class="site-footer"><div class="container footer-grid"><div><p class="footer-title">Member Wins</p><p class="footer-copy">A place for member-reported progress, smarter habits, and practical money decisions.</p></div><div><p class="footer-title">Explore</p><div class="footer-links"><a href="membership.html">Membership</a><a href="modules.html">Modules</a></div></div><div><p class="footer-title">Contact</p><div class="footer-links"><a href="contact.html">Contact page</a><a href="privacy.html">Privacy</a></div></div></div></footer>
   <script src="site.js"></script>
+  <script src="results.js"></script>
 </body>
 </html>
