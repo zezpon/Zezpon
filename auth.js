@@ -27,19 +27,31 @@ function initAuthForm(formId, endpoint) {
     });
 
     const result = await response.json();
+    const next = new URLSearchParams(window.location.search).get("next");
+    const safeNext = getSafeRelativeRedirect(next);
+    const billingUrl = (formId === "signupForm" || formId === "loginForm") && result.billingRequired
+      ? getSafeCheckoutRedirect(result.billingUrl)
+      : "";
+    const fallbackDestination = result.redirectTo || (formId === "signupForm" ? "membership.html" : "dashboard.html");
+    const destination = safeNext || billingUrl || fallbackDestination;
+
     if (!response.ok) {
+      if (billingUrl) {
+        message.textContent = result.error || "Redirecting to checkout...";
+        message.className = "auth-message warning";
+        window.location.href = destination;
+        return;
+      }
+
       message.textContent = result.error || "Something went wrong.";
       message.className = "auth-message error";
       return;
     }
 
-    message.textContent = "Success. Redirecting...";
+    message.textContent = formId === "signupForm"
+      ? "Account saved. Redirecting to secure checkout..."
+      : "Success. Redirecting...";
     message.className = "auth-message success";
-
-    const next = new URLSearchParams(window.location.search).get("next");
-    const safeNext = getSafeRelativeRedirect(next);
-    const billingUrl = formId === "signupForm" && result.billingRequired ? getSafeCheckoutRedirect(result.billingUrl) : "";
-    const destination = safeNext || billingUrl || result.redirectTo || "dashboard.html";
     window.location.href = destination;
   });
 }

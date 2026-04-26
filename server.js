@@ -272,7 +272,8 @@ app.post("/api/auth/signup", createRateLimit({
   const email = String(req.body.email || "").trim().toLowerCase();
   const password = String(req.body.password || "");
   const requestedPlan = String(req.body.plan || "").toLowerCase() === "premium" ? "premium" : "basic";
-  const plan = "basic";
+  const plan = requestedPlan;
+  const checkoutUrl = getCheckoutLinkForPlan(requestedPlan);
 
   if (!username || !name || !email || !password) {
     return res.status(400).json({ error: "Please complete all fields." });
@@ -302,12 +303,17 @@ app.post("/api/auth/signup", createRateLimit({
     return res.status(409).json({ error: "That username is already in use." });
   }
 
+  if (!checkoutUrl) {
+    return res.status(503).json({ error: `The ${requestedPlan} plan is not available until billing is connected.` });
+  }
+
   const user = {
     id: crypto.randomUUID(),
     username,
     name,
     email,
     plan,
+    billingStatus: "pending",
     role: "member",
     passwordHash: hashPassword(password),
     createdAt: new Date().toISOString(),
@@ -334,9 +340,9 @@ app.post("/api/auth/signup", createRateLimit({
 
   return res.status(201).json({
     user: sanitizeUser(user),
-    redirectTo: "/dashboard.html",
-    billingRequired: Boolean(getCheckoutLinkForPlan(requestedPlan)),
-    billingUrl: getCheckoutLinkForPlan(requestedPlan) || "",
+    redirectTo: `/membership.html?billing=pending&plan=${requestedPlan}`,
+    billingRequired: true,
+    billingUrl: checkoutUrl,
     verificationToken: process.env.SHOW_DEBUG_TOKENS === "true" ? verification.token : undefined
   });
 });
@@ -360,6 +366,16 @@ app.post("/api/auth/login", createRateLimit({
 
   const session = createSession(user.id, req);
   setSessionCookie(res, session.token);
+
+  if (!hasActiveMembership(user)) {
+    return res.status(402).json({
+      error: "Your account is waiting for payment confirmation. Please complete checkout to continue.",
+      user: sanitizeUser(user),
+      redirectTo: `/membership.html?billing=pending&plan=${user.plan}`,
+      billingRequired: true,
+      billingUrl: getCheckoutLinkForPlan(user.plan) || ""
+    });
+  }
 
   return res.json({
     user: sanitizeUser(user),
@@ -582,6 +598,15 @@ app.get("/api/dashboard", (req, res) => {
     return res.status(401).json({ error: "Login required." });
   }
 
+  if (!hasActiveMembership(user)) {
+    return res.status(402).json({
+      error: "Complete your membership checkout to unlock the dashboard.",
+      billingRequired: true,
+      billingUrl: getCheckoutLinkForPlan(user.plan) || "",
+      redirectTo: `/membership.html?billing=pending&plan=${user.plan}`
+    });
+  }
+
   return res.json(buildDashboardPayload(user));
 });
 
@@ -710,6 +735,9 @@ app.post("/api/member-wins", createRateLimit({
   const currentUser = getSessionUser(req);
   if (!currentUser) {
     return res.status(401).json({ error: "Login required." });
+  }
+  if (!hasActiveMembership(currentUser)) {
+    return res.status(402).json({ error: "Complete your membership checkout before sharing a member win." });
   }
 
   const payload = validateMemberWinSubmission(req.body);
@@ -1176,10 +1204,16 @@ function handlePageRequest(req, res, page) {
     if (!user) {
       return res.redirect(`/login.html?next=/${page}`);
     }
+    if (!hasActiveMembership(user)) {
+      return res.redirect(`/membership.html?billing=pending&plan=${user.plan}`);
+    }
   } else if (PREMIUM_FILES.has(page)) {
     const user = getSessionUser(req);
     if (!user) {
       return res.redirect(`/login.html?next=/${page}`);
+    }
+    if (!hasActiveMembership(user)) {
+      return res.redirect(`/membership.html?billing=pending&plan=${user.plan}`);
     }
     if (user.plan !== "premium") {
       return res.redirect("/membership.html");
@@ -1308,6 +1342,7 @@ function initDatabase() {
       name TEXT NOT NULL,
       email TEXT NOT NULL UNIQUE,
       plan TEXT NOT NULL,
+      billing_status TEXT NOT NULL DEFAULT 'active',
       role TEXT NOT NULL,
       password_hash TEXT NOT NULL,
       created_at TEXT NOT NULL
@@ -1405,6 +1440,7 @@ function initDatabase() {
 
   addColumnIfMissing("users", "username", "TEXT");
   addColumnIfMissing("users", "email_verified_at", "TEXT");
+  addColumnIfMissing("users", "billing_status", "TEXT NOT NULL DEFAULT 'active'");
   addColumnIfMissing("sessions", "ip_address", "TEXT");
   addColumnIfMissing("sessions", "user_agent", "TEXT");
   addColumnIfMissing("content_items", "module_slug", "TEXT NOT NULL DEFAULT ''");
@@ -1424,6 +1460,8 @@ function initDatabase() {
   addColumnIfMissing("member_wins", "is_featured", "INTEGER NOT NULL DEFAULT 0");
   addColumnIfMissing("member_wins", "published_name", "TEXT NOT NULL DEFAULT ''");
   addColumnIfMissing("member_wins", "admin_notes", "TEXT NOT NULL DEFAULT ''");
+
+  db.prepare("UPDATE users SET billing_status = 'active' WHERE billing_status IS NULL OR TRIM(billing_status) = ''").run();
 }
 
 function migrateLegacyData() {
@@ -1442,6 +1480,7 @@ function migrateLegacyData() {
       name: String(legacyUser.name || "Member").trim() || "Member",
       email,
       plan: legacyUser.plan === "premium" ? "premium" : "basic",
+      billingStatus: "active",
       role: normalizeRole(legacyUser.role),
       passwordHash: String(legacyUser.passwordHash || ""),
       createdAt: legacyUser.createdAt || new Date().toISOString(),
@@ -1503,9 +1542,20 @@ function backfillUsernames() {
 function insertUser(user) {
   const username = normalizeUsername(user.username) || generateUniqueUsername(user.name || user.email || "member");
   db.prepare(`
-    INSERT INTO users (id, username, name, email, plan, role, password_hash, created_at, email_verified_at)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `).run(user.id, username, user.name, user.email, user.plan, user.role, user.passwordHash, user.createdAt, user.emailVerifiedAt || null);
+    INSERT INTO users (id, username, name, email, plan, billing_status, role, password_hash, created_at, email_verified_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `).run(
+    user.id,
+    username,
+    user.name,
+    user.email,
+    user.plan,
+    normalizeBillingStatus(user.billingStatus),
+    user.role,
+    user.passwordHash,
+    user.createdAt,
+    user.emailVerifiedAt || null
+  );
 }
 
 function updateUserProfile(userId, payload) {
@@ -1615,9 +1665,26 @@ function sanitizeUser(user) {
     name: user.name,
     email: user.email,
     plan: user.plan,
+    billingStatus: normalizeBillingStatus(user.billing_status || user.billingStatus),
     role: normalizeRole(user.role),
     emailVerified: Boolean(user.email_verified_at)
   };
+}
+
+function normalizeBillingStatus(status) {
+  return String(status || "").trim().toLowerCase() === "pending" ? "pending" : "active";
+}
+
+function hasActiveMembership(user) {
+  if (!user) {
+    return false;
+  }
+
+  if (normalizeRole(user.role) === "admin") {
+    return true;
+  }
+
+  return normalizeBillingStatus(user.billing_status || user.billingStatus) === "active";
 }
 
 function normalizeRole(role) {
@@ -1648,6 +1715,7 @@ function ensureAdminAccount() {
       name,
       email,
       plan: "premium",
+    billingStatus: "active",
     role: "admin",
     passwordHash: hashPassword(password),
     createdAt: new Date().toISOString(),
@@ -2161,7 +2229,7 @@ function getMemberWinAdminStats() {
 }
 
 function getAllowedAccessLevels(user) {
-  if (!user) {
+  if (!user || !hasActiveMembership(user)) {
     return ["public"];
   }
   if (user.plan === "premium") {

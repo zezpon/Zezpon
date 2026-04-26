@@ -32,13 +32,25 @@ async function initBillingUi() {
   updatePriceLabel("basicPlanPrice", config.basicPriceLabel);
   updatePriceLabel("premiumPlanPrice", config.premiumPriceLabel);
 
+  const hasPendingMembership = sessionUser && String(sessionUser.billingStatus || "").toLowerCase() === "pending";
+
   if (basicButton instanceof HTMLAnchorElement) {
-    basicButton.href = "/signup.html?plan=basic";
-    basicButton.textContent = "Join Basic";
+    if (hasPendingMembership && String(sessionUser.plan || "").toLowerCase() === "basic" && config.basicCheckoutConfigured) {
+      basicButton.href = "/api/billing/checkout-link?plan=basic";
+      basicButton.textContent = "Complete Basic Checkout";
+      basicButton.addEventListener("click", handleHostedCheckoutLinkClick);
+    } else {
+      basicButton.href = "/signup.html?plan=basic";
+      basicButton.textContent = "Join Basic";
+    }
   }
 
   if (premiumButton instanceof HTMLAnchorElement) {
-    if (!sessionUser) {
+    if (hasPendingMembership && String(sessionUser.plan || "").toLowerCase() === "premium" && config.premiumCheckoutConfigured) {
+      premiumButton.href = "/api/billing/checkout-link?plan=premium";
+      premiumButton.textContent = "Complete Premium Checkout";
+      premiumButton.addEventListener("click", handleHostedCheckoutLinkClick);
+    } else if (!sessionUser) {
       premiumButton.href = "/signup.html?plan=premium";
       premiumButton.textContent = "Join Premium";
     } else if (String(sessionUser.plan || "").toLowerCase() === "premium") {
@@ -55,9 +67,12 @@ async function initBillingUi() {
   }
 
   if (billingNote) {
-    billingNote.textContent = config.basicCheckoutConfigured || config.premiumCheckoutConfigured
-      ? `Hosted checkout is connected through ${config.provider}.`
-      : "Membership continues through the account flow before checkout.";
+    const billingPending = new URLSearchParams(window.location.search).get("billing") === "pending";
+    billingNote.textContent = billingPending
+      ? "Your account is waiting for payment confirmation. Complete checkout for your selected plan to unlock member access."
+      : config.basicCheckoutConfigured || config.premiumCheckoutConfigured
+        ? `Hosted checkout is connected through ${config.provider}.`
+        : "Billing must be connected before new member accounts can be created.";
   }
 
   if (signupPlan instanceof HTMLSelectElement) {
@@ -72,8 +87,8 @@ async function initBillingUi() {
 
   if (signupBillingNote) {
     signupBillingNote.textContent = config.basicCheckoutConfigured || config.premiumCheckoutConfigured
-      ? `After account creation, secure checkout will open for the selected plan through ${config.provider}.`
-      : "After account creation, your account will open your dashboard.";
+      ? `Account setup continues through secure checkout for the selected paid plan via ${config.provider}.`
+      : "Billing must be connected before new member accounts can be created.";
   }
 }
 
@@ -152,6 +167,37 @@ async function handlePremiumUpgradeClick(event) {
     return;
   } catch {
     button.textContent = "Upgrade unavailable";
+  }
+
+  button.textContent = originalText;
+}
+
+async function handleHostedCheckoutLinkClick(event) {
+  event.preventDefault();
+  const button = event.currentTarget;
+  if (!(button instanceof HTMLAnchorElement)) {
+    return;
+  }
+
+  const targetHref = button.getAttribute("href") || "";
+  const originalText = button.textContent;
+  button.textContent = "Opening Checkout...";
+
+  try {
+    const response = await fetch(targetHref, { credentials: "same-origin" });
+    const result = await response.json();
+    if (!response.ok) {
+      button.textContent = result.error || "Checkout unavailable";
+      return;
+    }
+
+    if (result.checkoutUrl) {
+      window.location.href = result.checkoutUrl;
+      return;
+    }
+  } catch {
+    button.textContent = "Checkout unavailable";
+    return;
   }
 
   button.textContent = originalText;
