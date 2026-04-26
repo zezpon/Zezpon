@@ -38,9 +38,9 @@ function renderCounters(stats) {
       <span>Published member stories.</span>
     </article>
     <article class="stat-card">
-      <span class="stat-label">Smart Money Moves</span>
-      <strong>${Number(stats.approvedMoves || 0)}</strong>
-      <span>Approved progress updates.</span>
+      <span class="stat-label">Categories Live</span>
+      <strong>${Number(stats.activeCategories || 0)}</strong>
+      <span>Story categories currently represented.</span>
     </article>
     <article class="stat-card">
       <span class="stat-label">Budgeting Wins This Month</span>
@@ -60,6 +60,7 @@ function buildMemberWinCard(item, featured = false) {
   const startingPointBlock = item.beforeText
     ? `<p><strong>Starting point:</strong> ${escapeHtml(item.beforeText)}</p>`
     : "";
+  const quoteText = item.changeText || item.moneyMove || "Shared a practical money win.";
 
   return `
     <article class="member-win-card ${featured ? "featured" : ""}">
@@ -68,7 +69,7 @@ function buildMemberWinCard(item, featured = false) {
         ${verificationCopy}
       </div>
       <h3>${escapeHtml(item.displayHeadline)}</h3>
-      <p class="member-win-quote">"${escapeHtml(item.changeText)}"</p>
+      <p class="member-win-quote">"${escapeHtml(quoteText)}"</p>
       <div class="member-win-details">
         <p><strong>Member:</strong> ${escapeHtml(item.publicName)}</p>
         ${startingPointBlock}
@@ -91,7 +92,7 @@ function renderFeaturedWins(items) {
     target.innerHTML = `
       <article class="member-win-card featured member-win-empty">
         <h3>Your first member win can start this wall.</h3>
-        <p>There are no approved featured stories yet. Share a practical money move once you are ready.</p>
+        <p>There are no approved featured stories yet. Share a practical win when you are ready.</p>
         <div class="form-actions">
           <a class="btn btn-primary" href="#memberWinForm">Share Your Progress</a>
         </div>
@@ -117,11 +118,11 @@ function renderMemberWinGrid() {
     const filterLabel = formatCategoryLabel(memberWinState.activeFilter);
     const emptyHeading = memberWinState.activeFilter === "all"
       ? "No approved member stories have been published yet."
-      : `${filterLabel} stories have not been published yet.`;
+      : `No approved ${filterLabel.toLowerCase()} stories have been published yet.`;
     target.innerHTML = `
       <article class="member-win-card member-win-empty">
         <h3>${escapeHtml(emptyHeading)}</h3>
-        <p>Try another filter or be the first member to share a progress update in this area.</p>
+        <p>Try another filter or be the first member to share a story in this area.</p>
         <div class="form-actions">
           <a class="btn btn-secondary" href="#memberWinForm">Share Your Progress</a>
         </div>
@@ -156,6 +157,9 @@ async function loadMemberWins() {
     renderFeaturedWins(Array.isArray(result.featuredItems) ? result.featuredItems : []);
     renderMemberWinGrid();
   } catch (error) {
+    renderFeaturedWins([]);
+    memberWinState.items = [];
+    renderMemberWinGrid();
     setMemberWinMessage(error.message || "Unable to load member wins right now.", "error");
   }
 }
@@ -235,6 +239,9 @@ document.addEventListener("submit", async (event) => {
     });
     const result = await response.json();
     if (!response.ok) {
+      if (response.status === 401) {
+        throw new Error("Please log in before sharing your progress.");
+      }
       throw new Error(result.error || "Unable to submit your story.");
     }
 

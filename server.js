@@ -2118,6 +2118,12 @@ function getMemberWinPublicStats() {
     WHERE status = 'approved' AND publish_consent = 1
   `).get().count || 0);
 
+  const activeCategories = Number(db.prepare(`
+    SELECT COUNT(DISTINCT category_slug) AS count
+    FROM member_wins
+    WHERE status = 'approved' AND publish_consent = 1
+  `).get().count || 0);
+
   const budgetingWinsThisMonth = Number(db.prepare(`
     SELECT COUNT(*) AS count
     FROM member_wins
@@ -2129,7 +2135,7 @@ function getMemberWinPublicStats() {
 
   return {
     publishedStories,
-    approvedMoves: publishedStories,
+    activeCategories,
     budgetingWinsThisMonth
   };
 }
