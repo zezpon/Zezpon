@@ -73,7 +73,7 @@ function buildAuthLinks(user) {
 
   return `
     <a class="btn btn-secondary" href="login.html">Login</a>
-    <a class="btn btn-primary" href="signup.html">Sign Up</a>
+    <a class="btn btn-primary" href="signup.html">Join Zezpon</a>
   `;
 }
 
