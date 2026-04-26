@@ -251,6 +251,10 @@ h3 {
   flex-wrap: wrap;
 }
 
+.nav-actions {
+  display: none;
+}
+
 .auth-slot {
   display: flex;
   align-items: center;
