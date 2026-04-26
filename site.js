@@ -77,6 +77,29 @@ function buildAuthLinks(user) {
   `;
 }
 
+function applyPremiumLinkAccess(user) {
+  const premiumLockedLinks = document.querySelectorAll("[data-premium-required='true']");
+  if (!premiumLockedLinks.length) {
+    return;
+  }
+
+  const hasPremiumAccess = Boolean(
+    user &&
+    String(user.plan || "").toLowerCase() === "premium" &&
+    String(user.billingStatus || "").toLowerCase() === "active"
+  );
+
+  for (const link of premiumLockedLinks) {
+    if (!(link instanceof HTMLAnchorElement)) {
+      continue;
+    }
+
+    const premiumHref = link.getAttribute("data-premium-href") || "membership.html";
+    link.href = hasPremiumAccess ? premiumHref : "membership.html";
+    link.setAttribute("aria-disabled", hasPremiumAccess ? "false" : "true");
+  }
+}
+
 async function enhanceAuthNav() {
   const authTarget = ensureUtilityBar();
   standardizeNavActions();
@@ -89,6 +112,7 @@ async function enhanceAuthNav() {
     const response = await fetch("/api/session", { credentials: "same-origin" });
     const result = response.ok ? await response.json() : { user: null };
     authTarget.innerHTML = buildAuthLinks(result.user);
+    applyPremiumLinkAccess(result.user);
 
     const logoutButton = authTarget.querySelector("#logoutButton");
     logoutButton?.addEventListener("click", async () => {
@@ -101,6 +125,7 @@ async function enhanceAuthNav() {
     });
   } catch {
     authTarget.innerHTML = buildAuthLinks(null);
+    applyPremiumLinkAccess(null);
   }
 }
 
