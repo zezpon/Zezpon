@@ -1,8 +1,12 @@
 const MODULE_PAGE_LINKS = {
+  "intro-to-zezpon": "module-intro.html",
   "asx-workouts": "module-asx.html",
   "cpi-calendar": "module-cpi.html",
+  "rate-decisions": "module-rates.html",
+  "watchlist-habits": "module-watchlist.html",
   "video-blogs": "module-video-blogs.html",
-  "budget-systems": "module-budget.html"
+  "budget-systems": "module-budget.html",
+  "investor-routine": "module-routine.html"
 };
 
 async function loadManagedContentFeeds() {
