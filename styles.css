@@ -310,6 +310,13 @@ h3 {
   box-shadow: 0 10px 28px rgba(199, 164, 74, 0.18);
 }
 
+.utility-auth .btn-primary {
+  color: #120e07;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  text-shadow: none;
+}
+
 .btn-secondary {
   background: rgba(255, 255, 255, 0.04);
   border-color: var(--line);
