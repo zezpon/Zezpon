@@ -179,6 +179,7 @@ app.use("/video-detail.js", express.static(path.join(ROOT, "video-detail.js")));
 app.use("/videos.js", express.static(path.join(ROOT, "videos.js")));
 app.use("/billing.js", express.static(path.join(ROOT, "billing.js")));
 app.use("/results.js", express.static(path.join(ROOT, "results.js")));
+app.use("/contact.js", express.static(path.join(ROOT, "contact.js")));
 
 for (const [from, to] of OLD_REDIRECTS.entries()) {
   app.get(from, (_req, res) => res.redirect(301, to));
@@ -378,6 +379,48 @@ app.post("/api/auth/logout", (req, res) => {
 app.get("/api/session", (req, res) => {
   const sessionUser = getSessionUser(req);
   return res.json({ user: sessionUser ? sanitizeUser(sessionUser) : null });
+});
+
+app.get("/api/contact/config", (_req, res) => {
+  return res.json({
+    supportEmail: getSupportEmailAddress(),
+    replyTimeText: getSupportReplyTimeText()
+  });
+});
+
+app.post("/api/contact", createRateLimit({
+  windowMs: AUTH_WINDOW_MS,
+  max: AUTH_MAX_ATTEMPTS,
+  key: (req) => `contact:${getRequestIp(req)}`
+}), (req, res) => {
+  const payload = validateContactSubmission(req.body);
+  if (payload.error) {
+    return res.status(400).json({ error: payload.error });
+  }
+
+  const currentUser = getSessionUser(req);
+  const supportEmail = getSupportEmailAddress();
+  sendEmail({
+    to: supportEmail,
+    subject: `Zezpon contact enquiry: ${payload.value.enquiryTypeLabel}`,
+    text: buildContactEmailText(payload.value, currentUser)
+  });
+
+  logAuditEvent({
+    actorUserId: currentUser?.id || null,
+    targetUserId: null,
+    action: "contact.submitted",
+    metadata: {
+      enquiryType: payload.value.enquiryType,
+      email: payload.value.email,
+      username: payload.value.username || ""
+    }
+  });
+
+  return res.json({
+    success: true,
+    message: `Thanks for reaching out. We aim to reply within ${getSupportReplyTimeText().replace(/^We aim to reply within\s*/i, "")}`
+  });
 });
 
 app.get("/api/billing/config", (_req, res) => {
@@ -2592,6 +2635,88 @@ function safeJsonParse(value, fallbackValue) {
 
 function getBillingProvider() {
   return String(process.env.BILLING_PROVIDER || "hosted-links").trim().toLowerCase() || "hosted-links";
+}
+
+function getSupportEmailAddress() {
+  return String(process.env.SUPPORT_EMAIL || process.env.MAIL_FROM || "support@zezpon.com").trim();
+}
+
+function getSupportReplyTimeText() {
+  return String(process.env.SUPPORT_REPLY_TIME || "We aim to reply within 1-2 business days.").trim();
+}
+
+function validateContactSubmission(input) {
+  const name = String(input.name || "").trim();
+  const email = String(input.email || "").trim().toLowerCase();
+  const enquiryType = normalizeContactEnquiryType(input.enquiryType);
+  const username = String(input.username || "").trim();
+  const message = String(input.message || "").trim();
+  const privacyConfirmed = String(input.privacyConfirmed || "").trim().toLowerCase() === "yes";
+
+  if (!name || !email || !enquiryType || !message) {
+    return { error: "Please complete all required contact fields." };
+  }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    return { error: "Please enter a valid email address." };
+  }
+  if (name.length > 80) {
+    return { error: "Name must be 80 characters or fewer." };
+  }
+  if (username.length > 50) {
+    return { error: "Username or account name must be 50 characters or fewer." };
+  }
+  if (message.length < 10) {
+    return { error: "Please give a little more detail in your message." };
+  }
+  if (message.length > 2000) {
+    return { error: "Message must be 2000 characters or fewer." };
+  }
+  if (!privacyConfirmed) {
+    return { error: "Please confirm you will not send sensitive information through this form." };
+  }
+
+  return {
+    value: {
+      name,
+      email,
+      enquiryType,
+      enquiryTypeLabel: getContactEnquiryTypeLabel(enquiryType),
+      username,
+      message
+    }
+  };
+}
+
+function normalizeContactEnquiryType(value) {
+  const slug = String(value || "").trim().toLowerCase();
+  const allowed = new Set(["support", "membership", "partnership", "media", "general"]);
+  return allowed.has(slug) ? slug : "";
+}
+
+function getContactEnquiryTypeLabel(value) {
+  const labels = {
+    support: "Support",
+    membership: "Membership or billing",
+    partnership: "Partnership",
+    media: "Media or business",
+    general: "General enquiry"
+  };
+  return labels[value] || "General enquiry";
+}
+
+function buildContactEmailText(payload, currentUser) {
+  return [
+    "New contact enquiry submitted through the Zezpon website.",
+    "",
+    `Name: ${payload.name}`,
+    `Email: ${payload.email}`,
+    `Enquiry type: ${payload.enquiryTypeLabel}`,
+    `Username or account name: ${payload.username || "Not provided"}`,
+    `Logged-in member: ${currentUser ? `${currentUser.username || currentUser.name} (${currentUser.email})` : "No"}`,
+    "",
+    "Message:",
+    payload.message
+  ].join("\n");
 }
 
 function getBillingMode() {

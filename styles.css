@@ -1439,6 +1439,20 @@ h3 {
   padding: 20px;
 }
 
+.contact-direct-card {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 18px;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.contact-direct-card p {
+  margin: 0;
+}
+
 .quote-meta {
   display: grid;
   gap: 4px;

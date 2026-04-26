@@ -4,14 +4,95 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests" />
-  <meta name="description" content="Contact Zezpon for support, partnerships, and membership enquiries." />
+  <meta name="description" content="Contact Zezpon for support, memberships, partnerships, and general business enquiries." />
   <title>Contact | Zezpon</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <header class="site-header"><div class="container nav-wrap"><a href="Zezpon.html" class="brand"><div class="brand-mark">Z</div><div class="brand-copy"><strong>Zezpon</strong><span>Australian Market Academy</span></div></a><button class="menu-toggle" type="button" aria-expanded="false" aria-controls="siteNav">Menu</button><nav id="siteNav" class="site-nav"><a href="Zezpon.html">Home</a><a href="modules.html">Modules</a><a href="news.html">News</a><a href="results.html">Results</a><a href="videos.html">Videos</a><a href="membership.html">Membership</a><a href="guides.html">Guides</a><a class="active" href="contact.html">Contact</a></nav><div class="nav-actions"><a class="btn btn-secondary" href="privacy.html">Privacy</a><a class="btn btn-primary" href="security.html">Security</a></div></div></header>
-  <main><section class="page-hero"><div class="container"><p class="eyebrow">Support</p><h1>Contact Zezpon</h1><p>Reach out for support, partnerships, media enquiries, or general questions.</p></div></section><section class="section"><div class="container detail-layout"><div class="detail-copy"><section><h3>How we can help</h3><ul class="info-list"><li>General support and account help</li><li>Partnership and collaboration enquiries</li><li>Questions about membership and content</li></ul></section><section><h3>Support focus</h3><p>Zezpon support is centered on member access, content questions, and general business enquiries.</p></section></div><aside class="detail-sidebar"><p class="panel-label">Helpful pages</p><ul class="feature-list"><li><a href="security.html">Security overview</a></li><li><a href="privacy.html">Privacy policy</a></li><li><a href="terms.html">Terms of use</a></li><li><a href="membership.html">Membership structure</a></li></ul></aside></div></section></main>
-  <footer class="site-footer"><div class="container footer-grid"><div><p class="footer-title">Support</p><p class="footer-copy">Reach out for account help, partnerships, and questions about Zezpon memberships or content.</p></div><div><p class="footer-title">Explore</p><div class="footer-links"><a href="Zezpon.html">Home</a><a href="guides.html">Guides</a></div></div><div><p class="footer-title">Policies</p><div class="footer-links"><a href="security.html">Security</a><a href="privacy.html">Privacy</a><a href="terms.html">Terms</a></div></div></div></footer>
+  <header class="site-header"><div class="container nav-wrap"><a href="Zezpon.html" class="brand"><div class="brand-mark">Z</div><div class="brand-copy"><strong>Zezpon</strong><span>Australian Market Academy</span></div></a><button class="menu-toggle" type="button" aria-expanded="false" aria-controls="siteNav">Menu</button><nav id="siteNav" class="site-nav"><a href="Zezpon.html">Home</a><a href="modules.html">Modules</a><a href="news.html">News</a><a href="results.html">Member Wins</a><a href="videos.html">Videos</a><a href="membership.html">Membership</a><a href="guides.html">Guides</a><a class="active" href="contact.html">Contact</a></nav><div class="nav-actions"><a class="btn btn-secondary" href="privacy.html">Privacy</a><a class="btn btn-primary" href="security.html">Security</a></div></div></header>
+  <main>
+    <section class="page-hero">
+      <div class="container">
+        <p class="eyebrow">Support</p>
+        <h1>Contact Zezpon</h1>
+        <p>Reach out for support, membership questions, partnerships, or general business enquiries.</p>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container detail-layout">
+        <div class="detail-copy">
+          <section class="form-panel">
+            <p class="panel-label">Send a message</p>
+            <h2>Contact the Zezpon team</h2>
+            <p class="form-intro">Use the form below and choose the enquiry type that best matches what you need.</p>
+            <form id="contactForm">
+              <div class="admin-control-row">
+                <div class="field-block">
+                  <label for="contactName">Full name</label>
+                  <input id="contactName" name="name" type="text" maxlength="80" required />
+                </div>
+                <div class="field-block">
+                  <label for="contactEmail">Email address</label>
+                  <input id="contactEmail" name="email" type="email" maxlength="120" required />
+                </div>
+              </div>
+              <div class="admin-control-row">
+                <div class="field-block">
+                  <label for="contactType">Enquiry type</label>
+                  <select id="contactType" name="enquiryType" required>
+                    <option value="">Select one</option>
+                    <option value="support">Support</option>
+                    <option value="membership">Membership or billing</option>
+                    <option value="partnership">Partnership</option>
+                    <option value="media">Media or business</option>
+                    <option value="general">General enquiry</option>
+                  </select>
+                </div>
+                <div class="field-block">
+                  <label for="contactUsername">Username or account name</label>
+                  <input id="contactUsername" name="username" type="text" maxlength="50" placeholder="Optional" />
+                </div>
+              </div>
+              <div class="field-block">
+                <label for="contactMessage">Message</label>
+                <textarea id="contactMessage" name="message" rows="6" maxlength="2000" required></textarea>
+              </div>
+              <div class="field-block">
+                <label class="checkbox-field" for="contactPrivacy">
+                  <input id="contactPrivacy" name="privacyConfirmed" type="checkbox" value="yes" required />
+                  <span>I understand this form is for general support and business enquiries only, and I will not send passwords, payment details, or sensitive financial information.</span>
+                </label>
+              </div>
+              <div class="form-actions">
+                <button class="btn btn-primary" type="submit">Send Message</button>
+              </div>
+              <div class="auth-message" id="contactMessageState"></div>
+            </form>
+          </section>
+        </div>
+        <aside class="detail-sidebar">
+          <p class="panel-label">Contact details</p>
+          <div class="contact-direct-card">
+            <p><strong>Email:</strong> <a id="supportEmailLink" href="mailto:support@zezpon.com">support@zezpon.com</a></p>
+            <p><strong>Reply time:</strong> <span id="supportReplyTime">We aim to reply within 1-2 business days.</span></p>
+          </div>
+          <p class="panel-label">Enquiry types</p>
+          <ul class="info-list">
+            <li>Support and account access help</li>
+            <li>Membership and billing questions</li>
+            <li>Partnership and collaboration enquiries</li>
+            <li>General business or media contact</li>
+          </ul>
+          <div class="notice-panel">
+            <p>Zezpon support is for general educational, account, and business enquiries. Do not send passwords, payment details, or sensitive personal financial information through this page.</p>
+          </div>
+        </aside>
+      </div>
+    </section>
+  </main>
+  <footer class="site-footer"><div class="container footer-grid"><div><p class="footer-title">Support</p><p class="footer-copy">Reach out for account help, partnerships, memberships, and general Zezpon enquiries.</p></div><div><p class="footer-title">Explore</p><div class="footer-links"><a href="Zezpon.html">Home</a><a href="guides.html">Guides</a></div></div><div><p class="footer-title">Policies</p><div class="footer-links"><a href="security.html">Security</a><a href="privacy.html">Privacy</a><a href="terms.html">Terms</a></div></div></div></footer>
   <script src="site.js"></script>
+  <script src="contact.js"></script>
 </body>
 </html>
