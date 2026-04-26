@@ -162,17 +162,28 @@ async function prefillMemberWinForm() {
   }
 }
 
+function applyMemberWinFilter(filterValue) {
+  memberWinState.activeFilter = filterValue || "all";
+  document.querySelectorAll("#memberWinFilters .filter-chip").forEach((chip) => {
+    const isActive = chip.getAttribute("data-filter") === memberWinState.activeFilter;
+    chip.classList.toggle("active", isActive);
+    chip.setAttribute("aria-pressed", String(isActive));
+  });
+  renderMemberWinGrid();
+}
+
 document.addEventListener("click", (event) => {
-  const button = event.target;
-  if (!(button instanceof HTMLElement) || !button.matches("[data-filter]")) {
+  const target = event.target;
+  if (!(target instanceof Element)) {
     return;
   }
 
-  memberWinState.activeFilter = button.getAttribute("data-filter") || "all";
-  document.querySelectorAll("#memberWinFilters .filter-chip").forEach((chip) => {
-    chip.classList.toggle("active", chip === button);
-  });
-  renderMemberWinGrid();
+  const button = target.closest("#memberWinFilters [data-filter]");
+  if (!(button instanceof HTMLElement)) {
+    return;
+  }
+
+  applyMemberWinFilter(button.getAttribute("data-filter") || "all");
 });
 
 document.addEventListener("submit", async (event) => {
@@ -225,4 +236,5 @@ document.addEventListener("submit", async (event) => {
 document.addEventListener("DOMContentLoaded", async () => {
   await prefillMemberWinForm();
   await loadMemberWins();
+  applyMemberWinFilter(memberWinState.activeFilter);
 });

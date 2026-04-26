@@ -1311,6 +1311,8 @@ h3 {
   flex-wrap: wrap;
   gap: 12px;
   margin-bottom: 22px;
+  position: relative;
+  z-index: 1;
 }
 
 .filter-chip {
